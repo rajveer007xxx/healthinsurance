@@ -9,16 +9,24 @@ import Customers from './pages/Customers'
 import AddCustomer from './pages/AddCustomer'
 import TransactionHistory from './pages/TransactionHistory'
 import Plans from './pages/Plans'
-import Invoices from './pages/Invoices'
-import Payments from './pages/Payments'
+import SendInvoices from './pages/SendInvoices'
+import AddonBills from './pages/AddonBills'
 import Complaints from './pages/Complaints'
+import Notifications from './pages/Notifications'
+import Reports from './pages/Reports'
+import WhatsappCampaign from './pages/WhatsappCampaign'
+import WhatsappTemplates from './pages/WhatsappTemplates'
+import Employees from './pages/Employees'
+import CustomerDistribution from './pages/CustomerDistribution'
+import DataManagement from './pages/DataManagement'
+import ConnectionRequests from './pages/ConnectionRequests'
+import Expenses from './pages/Expenses'
+import Refunds from './pages/Refunds'
+import DeletedUsers from './pages/DeletedUsers'
 import PaymentGateways from './pages/PaymentGateways'
 import AdminProfile from './pages/AdminProfile'
 import Settings from './pages/Settings'
-import Localities from './pages/Localities'
-import Companies from './pages/Companies'
 import Landing from './pages/Landing'
-import BillDues from './pages/BillDues'
 
 function App() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
@@ -55,28 +63,68 @@ function App() {
           element={isAdminAuthenticated ? <AddCustomer /> : <Navigate to="/admin/login" />} 
         />
         <Route 
-          path="/admin/bill-dues" 
-          element={isAdminAuthenticated ? <BillDues /> : <Navigate to="/admin/login" />} 
+          path="/admin/plans" 
+          element={isAdminAuthenticated ? <Plans /> : <Navigate to="/admin/login" />} 
         />
         <Route 
           path="/admin/transactions" 
           element={isAdminAuthenticated ? <TransactionHistory /> : <Navigate to="/admin/login" />} 
         />
         <Route 
-          path="/admin/plans" 
-          element={isAdminAuthenticated ? <Plans /> : <Navigate to="/admin/login" />} 
+          path="/admin/send-invoices" 
+          element={isAdminAuthenticated ? <SendInvoices /> : <Navigate to="/admin/login" />} 
         />
         <Route 
-          path="/admin/invoices" 
-          element={isAdminAuthenticated ? <Invoices /> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/payments" 
-          element={isAdminAuthenticated ? <Payments /> : <Navigate to="/admin/login" />} 
+          path="/admin/addon-bills" 
+          element={isAdminAuthenticated ? <AddonBills /> : <Navigate to="/admin/login" />} 
         />
         <Route 
           path="/admin/complaints" 
           element={isAdminAuthenticated ? <Complaints /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/notifications" 
+          element={isAdminAuthenticated ? <Notifications /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/reports" 
+          element={isAdminAuthenticated ? <Reports /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/whatsapp-campaign" 
+          element={isAdminAuthenticated ? <WhatsappCampaign /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/whatsapp-templates" 
+          element={isAdminAuthenticated ? <WhatsappTemplates /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/employees" 
+          element={isAdminAuthenticated ? <Employees /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/customer-distribution" 
+          element={isAdminAuthenticated ? <CustomerDistribution /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/data-management" 
+          element={isAdminAuthenticated ? <DataManagement /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/connection-requests" 
+          element={isAdminAuthenticated ? <ConnectionRequests /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/expenses" 
+          element={isAdminAuthenticated ? <Expenses /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/refunds" 
+          element={isAdminAuthenticated ? <Refunds /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/deleted-users" 
+          element={isAdminAuthenticated ? <DeletedUsers /> : <Navigate to="/admin/login" />} 
         />
         <Route 
           path="/admin/payment-gateways" 
@@ -89,14 +137,6 @@ function App() {
         <Route 
           path="/admin/settings" 
           element={isAdminAuthenticated ? <Settings /> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/localities" 
-          element={isAdminAuthenticated ? <Localities /> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/companies" 
-          element={isAdminAuthenticated ? <Companies /> : <Navigate to="/admin/login" />} 
         />
         
         <Route 
