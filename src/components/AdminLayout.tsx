@@ -6,7 +6,6 @@ import {
   Package,
   History,
   FileText,
-  CreditCard,
   MessageSquare,
   Bell,
   BarChart3,
@@ -42,7 +41,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     { path: '/admin/plans', icon: Package, label: 'Plans' },
     { path: '/admin/transactions', icon: History, label: 'Payment History' },
     { path: '/admin/send-invoices', icon: FileText, label: 'Send Manual Invoice' },
-    { path: '/admin/addon-bills', icon: CreditCard, label: 'Addon Bills' },
     { path: '/admin/complaints', icon: MessageSquare, label: 'Complaints List' },
     { path: '/admin/notifications', icon: Bell, label: 'Notifications' },
     { path: '/admin/reports', icon: BarChart3, label: 'Reports' },
@@ -89,7 +87,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         <div className="p-4 flex items-center justify-between border-b border-isp-border">
           {!isSidebarMinimized && (
             <img
-              src="http://82.29.162.153:8002/uploads/logo_821e1ed2-d5f0-4e4a-8c7f-0e3b5f8a9c1d.png"
+              src="/api/uploads/logo_821e1ed2-d5f0-4e4a-8c7f-0e3b5f8a9c1d.png"
               alt="Company Logo"
               className="h-12 w-auto"
             />

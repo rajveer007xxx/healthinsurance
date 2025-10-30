@@ -37,7 +37,7 @@ const AdminLogin: React.FC = () => {
       <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <img
-            src="http://82.29.162.153:8002/uploads/logo_821e1ed2-d5f0-4e4a-8c7f-0e3b5f8a9c1d.png"
+            src="/api/uploads/logo_821e1ed2-d5f0-4e4a-8c7f-0e3b5f8a9c1d.png"
             alt="Company Logo"
             className="h-16 mx-auto mb-4"
           />
