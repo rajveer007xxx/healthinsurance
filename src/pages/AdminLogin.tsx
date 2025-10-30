@@ -18,9 +18,10 @@ const AdminLogin: React.FC = () => {
     setLoading(true)
 
     try {
-      const response = await api.post('/admin/login', formData)
-      if (response.data.token) {
-        localStorage.setItem('adminToken', response.data.token)
+      const response = await api.post('/auth/admin/login', formData)
+      const token = response.data.token || response.data.access_token
+      if (token) {
+        localStorage.setItem('adminToken', token)
         localStorage.setItem('adminName', response.data.name || 'Admin')
         navigate('/admin/dashboard')
       }
