@@ -171,7 +171,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               {sidebarMinimized ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
             </button>
           </div>
-          <nav className="px-2 py-2 overflow-y-auto flex-1">
+          <nav className="px-2 py-2 overflow-y-auto flex-1 flex flex-col">
             {menuItems.map((item) => {
               const Icon = item.icon
               const isActive = location.pathname === item.path
