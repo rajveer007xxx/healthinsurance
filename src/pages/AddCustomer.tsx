@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../utils/api'
 import { ArrowLeft, Save } from 'lucide-react'
-import { formatDate } from '../utils/dateFormat'
+import { formatDate } from '../utils/dateFormate'
 
 interface CustomerForm {
   category: string
