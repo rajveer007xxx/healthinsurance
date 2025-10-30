@@ -19,6 +19,7 @@ import Localities from './pages/Localities'
 import Companies from './pages/Companies'
 import Landing from './pages/Landing'
 import BillDues from './pages/BillDues'
+import UnderConstruction from './components/UnderConstruction'
 
 function App() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
@@ -67,8 +68,12 @@ function App() {
           element={isAdminAuthenticated ? <Plans /> : <Navigate to="/admin/login" />} 
         />
         <Route 
-          path="/admin/invoices" 
+          path="/admin/send-invoices" 
           element={isAdminAuthenticated ? <Invoices /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/addon-bills" 
+          element={isAdminAuthenticated ? <UnderConstruction /> : <Navigate to="/admin/login" />} 
         />
         <Route 
           path="/admin/payments" 
@@ -77,6 +82,50 @@ function App() {
         <Route 
           path="/admin/complaints" 
           element={isAdminAuthenticated ? <Complaints /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/notifications" 
+          element={isAdminAuthenticated ? <UnderConstruction /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/reports" 
+          element={isAdminAuthenticated ? <UnderConstruction /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/whatsapp-campaign" 
+          element={isAdminAuthenticated ? <UnderConstruction /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/whatsapp-templates" 
+          element={isAdminAuthenticated ? <UnderConstruction /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/employees" 
+          element={isAdminAuthenticated ? <UnderConstruction /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/customer-distribution" 
+          element={isAdminAuthenticated ? <UnderConstruction /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/data-management" 
+          element={isAdminAuthenticated ? <UnderConstruction /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/connection-requests" 
+          element={isAdminAuthenticated ? <UnderConstruction /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/expenses" 
+          element={isAdminAuthenticated ? <UnderConstruction /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/refunds" 
+          element={isAdminAuthenticated ? <UnderConstruction /> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/deleted-users" 
+          element={isAdminAuthenticated ? <UnderConstruction /> : <Navigate to="/admin/login" />} 
         />
         <Route 
           path="/admin/payment-gateways" 
