@@ -1,8 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = window.location.hostname === 'localhost' 
-  ? 'http://localhost:8001'
-  : '/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://82.29.162.153:8002'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -44,15 +42,13 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       const currentPath = window.location.pathname
-      if (currentPath.startsWith('/superadmin') && !currentPath.includes('/login')) {
+      if (currentPath.startsWith('/superadmin')) {
         localStorage.removeItem('token')
-        localStorage.removeItem('user')
-        localStorage.removeItem('userRole')
         window.location.href = '/superadmin/login'
-      } else if (currentPath.startsWith('/admin') && !currentPath.includes('/login')) {
+      } else if (currentPath.startsWith('/admin')) {
         localStorage.removeItem('adminToken')
         window.location.href = '/admin/login'
-      } else if (currentPath.startsWith('/customer') && !currentPath.includes('/login')) {
+      } else if (currentPath.startsWith('/customer')) {
         localStorage.removeItem('customerToken')
         window.location.href = '/customer/login'
       }

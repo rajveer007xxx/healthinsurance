@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { LayoutDashboard, Users, Package, FileText, CreditCard, Settings, LogOut, History, Receipt, AlertCircle, HeadphonesIcon, Bell, MessageCircleIcon, FileTextIcon, BarChart3, UsersIcon, UserPlus, Database, Mail, SettingsIcon, BookOpen, ClipboardList, Wallet, RefreshCw, Trash2, MessageSquareText, UserCircle, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
+import { LayoutDashboard, Users, Package, FileText, CreditCard, Settings, LogOut, History, Receipt, AlertCircle, HeadphonesIcon, Bell, MessageCircleIcon, FileTextIcon, BarChart3, UsersIcon, UserPlus, Database, Mail, SettingsIcon, BookOpen, ClipboardList, Wallet, RefreshCw, Trash2, UserCircle, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import api from '../utils/api'
 import { useSessionTimeout } from '../hooks/useSessionTimeout'
 
@@ -62,7 +62,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/plans', icon: Package, label: 'Plans' },
     { path: '/admin/transactions', icon: History, label: 'Payment History' },
     { path: '/admin/send-invoices', icon: Receipt, label: 'Send Manual Invoice' },
-    { path: '/admin/addon-bills', icon: Mail, label: 'Addon Bills' },
     { path: '/admin/complaints', icon: AlertCircle, label: 'Complaints List' },
     { path: '/admin/notifications', icon: Bell, label: 'Notifications' },
     { path: '/admin/reports', icon: BarChart3, label: 'Reports' },
