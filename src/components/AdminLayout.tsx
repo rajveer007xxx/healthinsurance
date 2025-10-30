@@ -14,8 +14,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [adminName, setAdminName] = useState('Admin')
   const [profileImage, setProfileImage] = useState('')
-  const [companyName, setCompanyName] = useState('ispbilling.in')
-  const [companyCode, setCompanyCode] = useState('')
+  const [companyName, setCompanyName] = useState('FIBERNET INTERNET')
+  const [companyCode, setCompanyCode] = useState('17558933')
   const [companyLogo, setCompanyLogo] = useState('')
   const [sidebarMinimized, setSidebarMinimized] = useState(false)
   const { showWarning, extendSession, logout } = useSessionTimeout()
@@ -42,8 +42,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     try {
       const response = await api.get('/settings/')
       if (response.data) {
-        setCompanyName(response.data.company_name || 'ispbilling.in')
-        setCompanyCode(response.data.company_code || '')
+        setCompanyName(response.data.company_name || 'FIBERNET INTERNET')
+        setCompanyCode(response.data.company_code || '17558933')
         setCompanyLogo(response.data.company_logo || '')
       }
     } catch (error) {
@@ -62,6 +62,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/plans', icon: Package, label: 'Plans' },
     { path: '/admin/transactions', icon: History, label: 'Payment History' },
     { path: '/admin/send-invoices', icon: Receipt, label: 'Send Manual Invoice' },
+    { path: '/admin/addon-bills', icon: Mail, label: 'Addon Bills' },
     { path: '/admin/complaints', icon: AlertCircle, label: 'Complaints List' },
     { path: '/admin/notifications', icon: Bell, label: 'Notifications' },
     { path: '/admin/reports', icon: BarChart3, label: 'Reports' },
