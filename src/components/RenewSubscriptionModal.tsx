@@ -9,9 +9,10 @@ interface Customer {
   mobile: string
   plan_id?: number
   plan_name?: string
-  expiry_date?: string
+  end_date?: string
   status?: string
   username?: string
+  auto_renew?: boolean
 }
 
 interface RenewSubscriptionModalProps {
@@ -36,9 +37,9 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
       setRenewWithMonths(1)
       setInstantRenewMonths(1)
       setInstantRenewDate('')
-      setAutoRenew(false)
-      setActivateCustomer(customer.status === 'active')
-      setUpdateEndDate(customer.expiry_date || '')
+      setAutoRenew(customer.auto_renew || false)
+      setActivateCustomer(customer.status === 'ACTIVE')
+      setUpdateEndDate(customer.end_date ? customer.end_date.split('T')[0] : '')
       setError('')
     }
   }, [isOpen, customer])
@@ -55,8 +56,10 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
     setError('')
 
     try {
-      await api.patch(`/customers/${customer.id}`, {
-        expiry_date: updateEndDate
+      const endDateISO = new Date(updateEndDate + 'T00:00:00').toISOString()
+      await api.put(`/customers/${customer.id}`, {
+        end_date: endDateISO,
+        status: 'ACTIVE'
       })
       
       alert('End date updated successfully!')
@@ -76,7 +79,7 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
     setError('')
 
     try {
-      await api.patch(`/customers/${customer.id}`, {
+      await api.put(`/customers/${customer.id}`, {
         auto_renew: checked
       })
       
@@ -97,8 +100,8 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
     setError('')
 
     try {
-      await api.patch(`/customers/${customer.id}`, {
-        status: checked ? 'active' : 'inactive'
+      await api.put(`/customers/${customer.id}`, {
+        status: checked ? 'ACTIVE' : 'DEACTIVE'
       })
       
       setActivateCustomer(checked)
@@ -118,14 +121,23 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
     setError('')
 
     try {
-      await api.post('/renewals/', {
-        customer_id: customer.id,
-        period_months: renewWithMonths,
-        renew_from: 'current_date',
-        generate_invoice: withInvoice
-      })
+      if (withInvoice) {
+        await api.post(`/customers/${customer.id}/renew?period_months=${renewWithMonths}`)
+        alert(`Subscription renewed for ${renewWithMonths} month(s) with invoice!`)
+      } else {
+        if (!customer.end_date) {
+          setError('Customer end date not found')
+          return
+        }
+        const currentEndDate = new Date(customer.end_date)
+        const newEndDate = new Date(currentEndDate.getTime() + (renewWithMonths * 30 * 24 * 60 * 60 * 1000))
+        await api.put(`/customers/${customer.id}`, {
+          end_date: newEndDate.toISOString(),
+          status: 'ACTIVE'
+        })
+        alert(`Subscription renewed for ${renewWithMonths} month(s) without invoice!`)
+      }
       
-      alert(`Subscription renewed for ${renewWithMonths} month(s) from current date${withInvoice ? ' with invoice' : ' without invoice'}!`)
       onSuccess()
       onClose()
     } catch (err: any) {
@@ -147,14 +159,19 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
     setError('')
 
     try {
-      await api.post('/renewals/', {
-        customer_id: customer.id,
-        period_months: instantRenewMonths,
-        start_date: instantRenewDate,
-        generate_invoice: withInvoice
-      })
+      if (withInvoice) {
+        await api.post(`/customers/${customer.id}/renew?period_months=${instantRenewMonths}`)
+        alert(`Subscription renewed for ${instantRenewMonths} month(s) with invoice!`)
+      } else {
+        const startDate = new Date(instantRenewDate)
+        const newEndDate = new Date(startDate.getTime() + (instantRenewMonths * 30 * 24 * 60 * 60 * 1000))
+        await api.put(`/customers/${customer.id}`, {
+          end_date: newEndDate.toISOString(),
+          status: 'ACTIVE'
+        })
+        alert(`Subscription renewed for ${instantRenewMonths} month(s) without invoice!`)
+      }
       
-      alert(`Subscription renewed for ${instantRenewMonths} month(s) from ${instantRenewDate}${withInvoice ? ' with invoice' : ' without invoice'}!`)
       onSuccess()
       onClose()
     } catch (err: any) {
@@ -167,24 +184,8 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
   const handleRevertLastRenew = async () => {
     if (!customer) return
     
-    if (!confirm('Are you sure you want to revert the last renewal? This action cannot be undone.')) {
-      return
-    }
+    setError('Revert Last Renew functionality is not available. Please contact administrator.')
     
-    setLoading(true)
-    setError('')
-
-    try {
-      await api.post(`/customers/${customer.id}/revert-renewal`)
-      
-      alert('Last renewal reverted successfully!')
-      onSuccess()
-      onClose()
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to revert renewal')
-    } finally {
-      setLoading(false)
-    }
   }
 
   if (!isOpen || !customer) return null
@@ -199,94 +200,94 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="p-4">
           {error && (
-            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            <div className="mb-2 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-sm">
               {error}
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-6">
-            <div className="bg-gray-50 rounded-lg p-6">
-              <div className="bg-gray-600 text-white text-center py-2 mb-4 rounded">
-                <h3 className="font-semibold">Connection Information</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-gray-50 rounded-lg p-3">
+              <div className="bg-gray-600 text-white text-center py-1 mb-2 rounded">
+                <h3 className="font-semibold text-sm">Connection Information</h3>
               </div>
               
-              <div className="space-y-3">
-                <div className="bg-white p-3 rounded">
-                  <div className="text-sm font-semibold text-gray-700 mb-1">Customer Name</div>
-                  <div className="text-gray-900">{customer.full_name}</div>
+              <div className="space-y-1">
+                <div className="bg-white p-2 rounded">
+                  <div className="text-xs font-semibold text-gray-700">Customer Name</div>
+                  <div className="text-sm text-gray-900">{customer.full_name}</div>
                 </div>
 
-                <div className="bg-white p-3 rounded">
-                  <div className="text-sm font-semibold text-gray-700 mb-1">Customer ID</div>
-                  <div className="text-gray-900">{customer.customer_id}</div>
+                <div className="bg-white p-2 rounded">
+                  <div className="text-xs font-semibold text-gray-700">Customer ID</div>
+                  <div className="text-sm text-gray-900">{customer.customer_id}</div>
                 </div>
 
-                <div className="bg-white p-3 rounded">
-                  <div className="text-sm font-semibold text-gray-700 mb-1">Username</div>
-                  <div className="text-gray-900">{customer.username || customer.full_name}</div>
+                <div className="bg-white p-2 rounded">
+                  <div className="text-xs font-semibold text-gray-700">Username</div>
+                  <div className="text-sm text-gray-900">{customer.username || customer.full_name}</div>
                 </div>
 
-                <div className="bg-white p-3 rounded">
-                  <div className="text-sm font-semibold text-gray-700 mb-1">Plan Name</div>
-                  <div className="text-gray-900">{customer.plan_name || 'N/A'}</div>
+                <div className="bg-white p-2 rounded">
+                  <div className="text-xs font-semibold text-gray-700">Plan Name</div>
+                  <div className="text-sm text-gray-900">{customer.plan_name || 'N/A'}</div>
                 </div>
 
-                <div className="bg-white p-3 rounded">
-                  <div className="text-sm font-semibold text-gray-700 mb-1">Start Date</div>
-                  <div className="text-gray-900">
-                    {customer.expiry_date ? new Date(new Date(customer.expiry_date).setMonth(new Date(customer.expiry_date).getMonth() - 1)).toLocaleDateString('en-GB') : 'N/A'}
+                <div className="bg-white p-2 rounded">
+                  <div className="text-xs font-semibold text-gray-700">Start Date</div>
+                  <div className="text-sm text-gray-900">
+                    {customer.end_date ? new Date(new Date(customer.end_date).setMonth(new Date(customer.end_date).getMonth() - 1)).toLocaleDateString('en-GB') : 'N/A'}
                   </div>
                 </div>
 
-                <div className="bg-white p-3 rounded">
-                  <div className="text-sm font-semibold text-gray-700 mb-1">End Date</div>
-                  <div className="text-gray-900">
-                    {customer.expiry_date ? new Date(customer.expiry_date).toLocaleDateString('en-GB') : 'N/A'}
+                <div className="bg-white p-2 rounded">
+                  <div className="text-xs font-semibold text-gray-700">End Date</div>
+                  <div className="text-sm text-gray-900">
+                    {customer.end_date ? new Date(customer.end_date).toLocaleDateString('en-GB') : 'N/A'}
                   </div>
                 </div>
 
-                <div className="bg-white p-3 rounded">
-                  <div className="text-sm font-semibold text-gray-700 mb-1">Status</div>
-                  <div className={`font-semibold ${customer.status === 'active' ? 'text-green-600' : 'text-red-600'}`}>
-                    {customer.status || 'Deactive'}
+                <div className="bg-white p-2 rounded">
+                  <div className="text-xs font-semibold text-gray-700">Status</div>
+                  <div className={`text-sm font-semibold ${customer.status === 'ACTIVE' ? 'text-green-600' : 'text-red-600'}`}>
+                    {customer.status || 'DEACTIVE'}
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-blue-50 rounded-lg p-6">
-              <div className="bg-gray-600 text-white text-center py-2 mb-3 rounded">
-                <h3 className="font-semibold">Actions</h3>
+            <div className="bg-blue-50 rounded-lg p-3">
+              <div className="bg-gray-600 text-white text-center py-1 mb-2 rounded">
+                <h3 className="font-semibold text-sm">Actions</h3>
               </div>
 
-              <div className="bg-blue-100 py-2 px-3 mb-2 rounded">
-                <h4 className="font-semibold text-gray-800 text-center">General</h4>
+              <div className="bg-blue-100 py-1 px-2 mb-1 rounded">
+                <h4 className="font-semibold text-gray-800 text-center text-xs">General</h4>
               </div>
 
-              <div className="bg-white p-3 rounded mb-2">
-                <div className="flex items-center gap-2">
-                  <label className="text-sm font-medium text-gray-700 whitespace-nowrap">End Date:</label>
+              <div className="bg-white p-2 rounded mb-1">
+                <div className="flex items-center gap-1">
+                  <label className="text-xs font-medium text-gray-700 whitespace-nowrap">End Date:</label>
                   <input
                     type="date"
                     value={updateEndDate}
                     onChange={(e) => setUpdateEndDate(e.target.value)}
-                    className="flex-1 px-3 py-1 border border-gray-300 rounded text-sm"
+                    className="flex-1 px-2 py-1 border border-gray-300 rounded text-xs"
                   />
                   <button
                     onClick={handleUpdateEndDate}
-                    className="bg-teal-600 text-white px-4 py-1 rounded hover:bg-teal-700 text-sm disabled:opacity-50"
+                    className="bg-teal-600 text-white px-2 py-1 rounded hover:bg-teal-700 text-xs disabled:opacity-50"
                     disabled={loading}
                   >
-                    Update End Date
+                    Update
                   </button>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 mb-2">
-                <div className="flex items-center justify-between bg-white p-2 rounded">
-                  <span className="text-sm font-medium text-gray-700">Auto Renew:</span>
+              <div className="grid grid-cols-2 gap-2 mb-1">
+                <div className="flex items-center justify-between bg-white p-1 rounded">
+                  <span className="text-xs font-medium text-gray-700">Auto Renew:</span>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
@@ -295,12 +296,12 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
                       className="sr-only peer"
                       disabled={loading}
                     />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
+                    <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
                   </label>
                 </div>
 
-                <div className="flex items-center justify-between bg-white p-2 rounded">
-                  <span className="text-sm font-medium text-gray-700">Activate Customer:</span>
+                <div className="flex items-center justify-between bg-white p-1 rounded">
+                  <span className="text-xs font-medium text-gray-700">Activate:</span>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
@@ -309,94 +310,93 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
                       className="sr-only peer"
                       disabled={loading}
                     />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
+                    <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
                   </label>
                 </div>
               </div>
 
-              <div className="bg-blue-100 py-2 px-3 mb-2 rounded">
-                <h4 className="font-semibold text-gray-800 text-center">Renew</h4>
+              <div className="bg-blue-100 py-1 px-2 mb-1 rounded">
+                <h4 className="font-semibold text-gray-800 text-center text-xs">Renew</h4>
               </div>
 
-              <div className="bg-white p-3 rounded mb-2">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Renew With</span>
-                  <select className="flex-1 px-3 py-1 border border-gray-300 rounded text-sm">
+              <div className="bg-white p-2 rounded mb-1">
+                <div className="flex items-center gap-1 mb-1">
+                  <span className="text-xs font-medium text-gray-700 whitespace-nowrap">Renew With</span>
+                  <select className="flex-1 px-2 py-1 border border-gray-300 rounded text-xs">
                     <option>Current Date</option>
                   </select>
-                  <span className="text-sm text-gray-700">for</span>
+                  <span className="text-xs text-gray-700">for</span>
                   <input
                     type="number"
                     min="1"
                     value={renewWithMonths}
                     onChange={(e) => setRenewWithMonths(parseInt(e.target.value) || 1)}
-                    className="w-16 px-2 py-1 border border-gray-300 rounded text-sm text-center"
+                    className="w-12 px-1 py-1 border border-gray-300 rounded text-xs text-center"
                   />
-                  <span className="text-sm text-gray-700">Month</span>
+                  <span className="text-xs text-gray-700">Mo</span>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-1">
                   <button
                     onClick={() => handleRenewWithCurrentDate(true)}
-                    className="flex-1 bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700 text-sm disabled:opacity-50"
+                    className="flex-1 bg-teal-600 text-white px-2 py-1 rounded hover:bg-teal-700 text-xs disabled:opacity-50"
                     disabled={loading}
                   >
-                    Renew with Invoice
+                    With Invoice
                   </button>
                   <button
                     onClick={() => handleRenewWithCurrentDate(false)}
-                    className="flex-1 bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700 text-sm disabled:opacity-50"
+                    className="flex-1 bg-teal-600 text-white px-2 py-1 rounded hover:bg-teal-700 text-xs disabled:opacity-50"
                     disabled={loading}
                   >
-                    Renew without Invoice
+                    Without Invoice
                   </button>
                 </div>
               </div>
 
-              <div className="bg-white p-3 rounded mb-2">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Instant Renew From</span>
+              <div className="bg-white p-2 rounded mb-1">
+                <div className="flex items-center gap-1 mb-1">
+                  <span className="text-xs font-medium text-gray-700 whitespace-nowrap">Instant From</span>
                   <input
                     type="date"
                     value={instantRenewDate}
                     onChange={(e) => setInstantRenewDate(e.target.value)}
-                    className="flex-1 px-3 py-1 border border-gray-300 rounded text-sm"
-                    placeholder="Choose renew date"
+                    className="flex-1 px-2 py-1 border border-gray-300 rounded text-xs"
                   />
-                  <span className="text-sm text-gray-700">for</span>
+                  <span className="text-xs text-gray-700">for</span>
                   <input
                     type="number"
                     min="1"
                     value={instantRenewMonths}
                     onChange={(e) => setInstantRenewMonths(parseInt(e.target.value) || 1)}
-                    className="w-16 px-2 py-1 border border-gray-300 rounded text-sm text-center"
+                    className="w-12 px-1 py-1 border border-gray-300 rounded text-xs text-center"
                   />
-                  <span className="text-sm text-gray-700">Month</span>
+                  <span className="text-xs text-gray-700">Mo</span>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-1">
                   <button
                     onClick={() => handleInstantRenew(true)}
-                    className="flex-1 bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700 text-sm disabled:opacity-50"
+                    className="flex-1 bg-teal-600 text-white px-2 py-1 rounded hover:bg-teal-700 text-xs disabled:opacity-50"
                     disabled={loading}
                   >
-                    Renew with Invoice
+                    With Invoice
                   </button>
                   <button
                     onClick={() => handleInstantRenew(false)}
-                    className="flex-1 bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700 text-sm disabled:opacity-50"
+                    className="flex-1 bg-teal-600 text-white px-2 py-1 rounded hover:bg-teal-700 text-xs disabled:opacity-50"
                     disabled={loading}
                   >
-                    Renew without Invoice
+                    Without Invoice
                   </button>
                 </div>
               </div>
 
-              <div className="bg-blue-100 py-2 px-3 mb-2 rounded">
-                <h4 className="font-semibold text-gray-800 text-center">Renew Reversal</h4>
+              <div className="bg-blue-100 py-1 px-2 mb-1 rounded">
+                <h4 className="font-semibold text-gray-800 text-center text-xs">Renew Reversal</h4>
               </div>
 
               <button
                 onClick={handleRevertLastRenew}
-                className="w-full bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 disabled:opacity-50"
+                className="w-full bg-red-500 text-white py-1 px-2 rounded hover:bg-red-600 disabled:opacity-50 text-xs"
                 disabled={loading}
               >
                 Revert Last Renew
