@@ -4,6 +4,10 @@ import AdminLogin from './pages/AdminLogin'
 import Dashboard from './pages/Dashboard'
 import Userlist from './pages/Userlist'
 import AddCustomer from './pages/AddCustomer'
+import EditCustomer from './pages/EditCustomer'
+import RenewSubscription from './pages/RenewSubscription'
+import CollectPayment from './pages/CollectPayment'
+import CreateComplaint from './pages/CreateComplaint'
 import Plans from './pages/Plans'
 import PaymentHistory from './pages/PaymentHistory'
 import SendInvoices from './pages/SendInvoices'
@@ -41,10 +45,14 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="customers" element={<Userlist />} />
             <Route path="customers/add" element={<AddCustomer />} />
+            <Route path="customers/edit/:id" element={<EditCustomer />} />
+            <Route path="customers/renew/:id" element={<RenewSubscription />} />
+            <Route path="payments/collect/:id" element={<CollectPayment />} />
             <Route path="plans" element={<Plans />} />
             <Route path="transactions" element={<PaymentHistory />} />
             <Route path="send-invoices" element={<SendInvoices />} />
             <Route path="complaints" element={<Complaints />} />
+            <Route path="complaints/create" element={<CreateComplaint />} />
             <Route path="notifications" element={<Notifications />} />
             <Route path="reports" element={<Reports />} />
             <Route path="whatsapp-campaign" element={<WhatsappCampaign />} />
