@@ -27,6 +27,7 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
   const [instantRenewDate, setInstantRenewDate] = useState('')
   const [autoRenew, setAutoRenew] = useState(false)
   const [activateCustomer, setActivateCustomer] = useState(false)
+  const [updateEndDate, setUpdateEndDate] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -37,11 +38,80 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
       setInstantRenewDate('')
       setAutoRenew(false)
       setActivateCustomer(customer.status === 'active')
+      setUpdateEndDate(customer.expiry_date || '')
       setError('')
     }
   }, [isOpen, customer])
 
-  const handleRenewWithCurrentDate = async () => {
+  const handleUpdateEndDate = async () => {
+    if (!customer) return
+    
+    if (!updateEndDate) {
+      setError('Please select an end date')
+      return
+    }
+    
+    setLoading(true)
+    setError('')
+
+    try {
+      await api.patch(`/customers/${customer.id}`, {
+        expiry_date: updateEndDate
+      })
+      
+      alert('End date updated successfully!')
+      onSuccess()
+      onClose()
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to update end date')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleAutoRenewToggle = async (checked: boolean) => {
+    if (!customer) return
+    
+    setLoading(true)
+    setError('')
+
+    try {
+      await api.patch(`/customers/${customer.id}`, {
+        auto_renew: checked
+      })
+      
+      setAutoRenew(checked)
+      alert(`Auto renew ${checked ? 'enabled' : 'disabled'} successfully!`)
+      onSuccess()
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to update auto renew')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleActivateCustomerToggle = async (checked: boolean) => {
+    if (!customer) return
+    
+    setLoading(true)
+    setError('')
+
+    try {
+      await api.patch(`/customers/${customer.id}`, {
+        status: checked ? 'active' : 'inactive'
+      })
+      
+      setActivateCustomer(checked)
+      alert(`Customer ${checked ? 'activated' : 'deactivated'} successfully!`)
+      onSuccess()
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to update customer status')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleRenewWithCurrentDate = async (withInvoice: boolean) => {
     if (!customer) return
     
     setLoading(true)
@@ -51,10 +121,11 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
       await api.post('/renewals/', {
         customer_id: customer.id,
         period_months: renewWithMonths,
-        renew_from: 'current_date'
+        renew_from: 'current_date',
+        generate_invoice: withInvoice
       })
       
-      alert(`Subscription renewed for ${renewWithMonths} month(s) from current date!`)
+      alert(`Subscription renewed for ${renewWithMonths} month(s) from current date${withInvoice ? ' with invoice' : ' without invoice'}!`)
       onSuccess()
       onClose()
     } catch (err: any) {
@@ -64,7 +135,7 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
     }
   }
 
-  const handleInstantRenew = async () => {
+  const handleInstantRenew = async (withInvoice: boolean) => {
     if (!customer) return
     
     if (!instantRenewDate) {
@@ -79,10 +150,11 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
       await api.post('/renewals/', {
         customer_id: customer.id,
         period_months: instantRenewMonths,
-        start_date: instantRenewDate
+        start_date: instantRenewDate,
+        generate_invoice: withInvoice
       })
       
-      alert(`Subscription renewed for ${instantRenewMonths} month(s) from ${instantRenewDate}!`)
+      alert(`Subscription renewed for ${instantRenewMonths} month(s) from ${instantRenewDate}${withInvoice ? ' with invoice' : ' without invoice'}!`)
       onSuccess()
       onClose()
     } catch (err: any) {
@@ -115,79 +187,13 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
     }
   }
 
-  const handleAddGracePeriod = async () => {
-    if (!customer) return
-    
-    const days = prompt('Enter number of grace period days:')
-    if (!days || isNaN(parseInt(days))) return
-    
-    setLoading(true)
-    setError('')
-
-    try {
-      await api.post(`/customers/${customer.id}/add-grace-period`, {
-        days: parseInt(days)
-      })
-      
-      alert(`Grace period of ${days} days added successfully!`)
-      onSuccess()
-      onClose()
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to add grace period')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleStartConnection = async () => {
-    if (!customer) return
-    
-    setLoading(true)
-    setError('')
-
-    try {
-      await api.post(`/customers/${customer.id}/start-connection`)
-      
-      alert('Connection started successfully!')
-      onSuccess()
-      onClose()
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to start connection')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleSuspend = async () => {
-    if (!customer) return
-    
-    if (!confirm('Are you sure you want to suspend this customer?')) {
-      return
-    }
-    
-    setLoading(true)
-    setError('')
-
-    try {
-      await api.post(`/customers/${customer.id}/suspend`)
-      
-      alert('Customer suspended successfully!')
-      onSuccess()
-      onClose()
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to suspend customer')
-    } finally {
-      setLoading(false)
-    }
-  }
-
   if (!isOpen || !customer) return null
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[95vh] overflow-y-auto">
         <div className="sticky top-0 bg-teal-600 text-white px-6 py-4 flex items-center justify-between">
-          <h2 className="text-2xl font-bold">View Connections</h2>
+          <h2 className="text-2xl font-bold">Renew Customer</h2>
           <button onClick={onClose} className="text-white hover:text-gray-200">
             <X className="h-6 w-6" />
           </button>
@@ -251,47 +257,43 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
             </div>
 
             <div className="bg-blue-50 rounded-lg p-6">
-              <div className="bg-gray-600 text-white text-center py-2 mb-4 rounded">
+              <div className="bg-gray-600 text-white text-center py-2 mb-3 rounded">
                 <h3 className="font-semibold">Actions</h3>
               </div>
 
-              <div className="bg-blue-100 py-2 px-3 mb-3 rounded">
+              <div className="bg-blue-100 py-2 px-3 mb-2 rounded">
                 <h4 className="font-semibold text-gray-800 text-center">General</h4>
               </div>
 
-              <div className="grid grid-cols-3 gap-3 mb-4">
-                <button
-                  onClick={handleAddGracePeriod}
-                  className="bg-teal-500 text-white py-2 px-4 rounded hover:bg-teal-600 disabled:opacity-50"
-                  disabled={loading}
-                >
-                  Add Grace Period
-                </button>
-                <button
-                  onClick={handleStartConnection}
-                  className="bg-teal-500 text-white py-2 px-4 rounded hover:bg-teal-600 disabled:opacity-50"
-                  disabled={loading}
-                >
-                  Start Connection
-                </button>
-                <button
-                  onClick={handleSuspend}
-                  className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 disabled:opacity-50"
-                  disabled={loading}
-                >
-                  Suspend
-                </button>
+              <div className="bg-white p-3 rounded mb-2">
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-gray-700 whitespace-nowrap">End Date:</label>
+                  <input
+                    type="date"
+                    value={updateEndDate}
+                    onChange={(e) => setUpdateEndDate(e.target.value)}
+                    className="flex-1 px-3 py-1 border border-gray-300 rounded text-sm"
+                  />
+                  <button
+                    onClick={handleUpdateEndDate}
+                    className="bg-teal-600 text-white px-4 py-1 rounded hover:bg-teal-700 text-sm disabled:opacity-50"
+                    disabled={loading}
+                  >
+                    Update End Date
+                  </button>
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-2 gap-3 mb-2">
                 <div className="flex items-center justify-between bg-white p-2 rounded">
                   <span className="text-sm font-medium text-gray-700">Auto Renew:</span>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
                       checked={autoRenew}
-                      onChange={(e) => setAutoRenew(e.target.checked)}
+                      onChange={(e) => handleAutoRenewToggle(e.target.checked)}
                       className="sr-only peer"
+                      disabled={loading}
                     />
                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
                   </label>
@@ -303,21 +305,20 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
                     <input
                       type="checkbox"
                       checked={activateCustomer}
-                      onChange={(e) => setActivateCustomer(e.target.checked)}
+                      onChange={(e) => handleActivateCustomerToggle(e.target.checked)}
                       className="sr-only peer"
+                      disabled={loading}
                     />
                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
                   </label>
                 </div>
               </div>
 
-              <div className="text-xs text-red-600 mb-4 text-right">*To change status only</div>
-
-              <div className="bg-blue-100 py-2 px-3 mb-3 rounded">
+              <div className="bg-blue-100 py-2 px-3 mb-2 rounded">
                 <h4 className="font-semibold text-gray-800 text-center">Renew</h4>
               </div>
 
-              <div className="bg-white p-3 rounded mb-3">
+              <div className="bg-white p-3 rounded mb-2">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Renew With</span>
                   <select className="flex-1 px-3 py-1 border border-gray-300 rounded text-sm">
@@ -332,17 +333,26 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
                     className="w-16 px-2 py-1 border border-gray-300 rounded text-sm text-center"
                   />
                   <span className="text-sm text-gray-700">Month</span>
+                </div>
+                <div className="flex gap-2">
                   <button
-                    onClick={handleRenewWithCurrentDate}
-                    className="bg-teal-600 text-white px-4 py-1 rounded hover:bg-teal-700 text-sm disabled:opacity-50"
+                    onClick={() => handleRenewWithCurrentDate(true)}
+                    className="flex-1 bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700 text-sm disabled:opacity-50"
                     disabled={loading}
                   >
-                    Submit
+                    Renew with Invoice
+                  </button>
+                  <button
+                    onClick={() => handleRenewWithCurrentDate(false)}
+                    className="flex-1 bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700 text-sm disabled:opacity-50"
+                    disabled={loading}
+                  >
+                    Renew without Invoice
                   </button>
                 </div>
               </div>
 
-              <div className="bg-white p-3 rounded mb-4">
+              <div className="bg-white p-3 rounded mb-2">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Instant Renew From</span>
                   <input
@@ -361,17 +371,26 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
                     className="w-16 px-2 py-1 border border-gray-300 rounded text-sm text-center"
                   />
                   <span className="text-sm text-gray-700">Month</span>
+                </div>
+                <div className="flex gap-2">
                   <button
-                    onClick={handleInstantRenew}
-                    className="bg-teal-600 text-white px-4 py-1 rounded hover:bg-teal-700 text-sm disabled:opacity-50"
+                    onClick={() => handleInstantRenew(true)}
+                    className="flex-1 bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700 text-sm disabled:opacity-50"
                     disabled={loading}
                   >
-                    Submit
+                    Renew with Invoice
+                  </button>
+                  <button
+                    onClick={() => handleInstantRenew(false)}
+                    className="flex-1 bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700 text-sm disabled:opacity-50"
+                    disabled={loading}
+                  >
+                    Renew without Invoice
                   </button>
                 </div>
               </div>
 
-              <div className="bg-blue-100 py-2 px-3 mb-3 rounded">
+              <div className="bg-blue-100 py-2 px-3 mb-2 rounded">
                 <h4 className="font-semibold text-gray-800 text-center">Renew Reversal</h4>
               </div>
 
