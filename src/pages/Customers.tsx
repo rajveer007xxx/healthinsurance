@@ -1,4 +1,3 @@
-import AdminLayout from '../components/AdminLayout'
 import { useState, useEffect } from 'react'
 import api from '../utils/api'
 import { Plus, Edit, Trash } from 'lucide-react'
@@ -23,7 +22,7 @@ export default function Customers() {
   }
 
   return (
-    <AdminLayout>
+
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-900">Customers</h1>
@@ -87,6 +86,6 @@ export default function Customers() {
           </table>
         </div>
       </div>
-    </AdminLayout>
+
   )
 }

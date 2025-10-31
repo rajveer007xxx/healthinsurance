@@ -1,4 +1,3 @@
-import AdminLayout from '../components/AdminLayout'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../utils/api'
@@ -405,7 +404,6 @@ export default function AddCustomer() {
   }
 
   return (
-    <AdminLayout>
       <div className="space-y-6">
         {/* Header - Fixed when scrolling */}
         <div className="sticky top-0 z-10 bg-white pb-4 flex justify-between items-center">
@@ -1031,6 +1029,5 @@ export default function AddCustomer() {
           </div>
         </div>
       </div>
-    </AdminLayout>
   )
 }

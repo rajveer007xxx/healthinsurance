@@ -1,14 +1,10 @@
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, Outlet } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { LayoutDashboard, Users, Package, History, Receipt, AlertCircle, Bell, BarChart3, UsersIcon, UserPlus, Database, ClipboardList, Wallet, RefreshCw, Trash2, Settings, LogOut, UserCircle, ChevronDown, ChevronLeft, ChevronRight, MessageCircle, FileText } from 'lucide-react'
 import api from '../utils/api'
 import { useSessionTimeout } from '../hooks/useSessionTimeout'
 
-interface AdminLayoutProps {
-  children: React.ReactNode
-}
-
-export default function AdminLayout({ children }: AdminLayoutProps) {
+export default function AdminLayout() {
   const navigate = useNavigate()
   const location = useLocation()
   const [showProfileMenu, setShowProfileMenu] = useState(false)
@@ -198,7 +194,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* Main Content Area */}
         <main className="flex-1 bg-gray-100 p-4 md:p-6 overflow-x-hidden">
           <div className="max-w-full">
-            {children}
+            <Outlet />
           </div>
         </main>
       </div>

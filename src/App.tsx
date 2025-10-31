@@ -40,90 +40,29 @@ function App() {
         <Route path="/" element={<Navigate to="/admin/login" />} />
         <Route path="/admin/login" element={<AdminLogin setIsAuthenticated={setIsAdminAuthenticated} />} />
         
-        <Route 
-          path="/admin/dashboard" 
-          element={isAdminAuthenticated ? <AdminLayout><Dashboard /></AdminLayout> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/customers" 
-          element={isAdminAuthenticated ? <AdminLayout><Userlist /></AdminLayout> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/customers/add" 
-          element={isAdminAuthenticated ? <AdminLayout><AddCustomer /></AdminLayout> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/plans"
-          element={isAdminAuthenticated ? <AdminLayout><Plans /></AdminLayout> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/transactions" 
-          element={isAdminAuthenticated ? <AdminLayout><PaymentHistory /></AdminLayout> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/send-invoices" 
-          element={isAdminAuthenticated ? <AdminLayout><SendInvoices /></AdminLayout> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/complaints" 
-          element={isAdminAuthenticated ? <AdminLayout><Complaints /></AdminLayout> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/notifications" 
-          element={isAdminAuthenticated ? <AdminLayout><Notifications /></AdminLayout> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/reports" 
-          element={isAdminAuthenticated ? <AdminLayout><Reports /></AdminLayout> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/whatsapp-campaign" 
-          element={isAdminAuthenticated ? <AdminLayout><WhatsappCampaign /></AdminLayout> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/whatsapp-templates" 
-          element={isAdminAuthenticated ? <AdminLayout><WhatsappTemplates /></AdminLayout> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/employees" 
-          element={isAdminAuthenticated ? <AdminLayout><EmployeeManagement /></AdminLayout> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/customer-distribution" 
-          element={isAdminAuthenticated ? <AdminLayout><CustomerDistribution /></AdminLayout> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/data-management" 
-          element={isAdminAuthenticated ? <AdminLayout><DataManagement /></AdminLayout> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/connection-requests" 
-          element={isAdminAuthenticated ? <AdminLayout><ConnectionRequest /></AdminLayout> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/expenses" 
-          element={isAdminAuthenticated ? <AdminLayout><ExpenseList /></AdminLayout> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/refunds" 
-          element={isAdminAuthenticated ? <AdminLayout><RefundList /></AdminLayout> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/deleted-users" 
-          element={isAdminAuthenticated ? <AdminLayout><DeletedUsers /></AdminLayout> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/payment-gateways" 
-          element={isAdminAuthenticated ? <AdminLayout><PaymentGateways /></AdminLayout> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/profile" 
-          element={isAdminAuthenticated ? <AdminLayout><Profile /></AdminLayout> : <Navigate to="/admin/login" />} 
-        />
-        <Route 
-          path="/admin/settings" 
-          element={isAdminAuthenticated ? <AdminLayout><Settings /></AdminLayout> : <Navigate to="/admin/login" />} 
-        />
+        <Route element={isAdminAuthenticated ? <AdminLayout /> : <Navigate to="/admin/login" />}>
+          <Route path="/admin/dashboard" element={<Dashboard />} />
+          <Route path="/admin/customers" element={<Userlist />} />
+          <Route path="/admin/customers/add" element={<AddCustomer />} />
+          <Route path="/admin/plans" element={<Plans />} />
+          <Route path="/admin/transactions" element={<PaymentHistory />} />
+          <Route path="/admin/send-invoices" element={<SendInvoices />} />
+          <Route path="/admin/complaints" element={<Complaints />} />
+          <Route path="/admin/notifications" element={<Notifications />} />
+          <Route path="/admin/reports" element={<Reports />} />
+          <Route path="/admin/whatsapp-campaign" element={<WhatsappCampaign />} />
+          <Route path="/admin/whatsapp-templates" element={<WhatsappTemplates />} />
+          <Route path="/admin/employees" element={<EmployeeManagement />} />
+          <Route path="/admin/customer-distribution" element={<CustomerDistribution />} />
+          <Route path="/admin/data-management" element={<DataManagement />} />
+          <Route path="/admin/connection-requests" element={<ConnectionRequest />} />
+          <Route path="/admin/expenses" element={<ExpenseList />} />
+          <Route path="/admin/refunds" element={<RefundList />} />
+          <Route path="/admin/deleted-users" element={<DeletedUsers />} />
+          <Route path="/admin/payment-gateways" element={<PaymentGateways />} />
+          <Route path="/admin/profile" element={<Profile />} />
+          <Route path="/admin/settings" element={<Settings />} />
+        </Route>
       </Routes>
     </Router>
   )
