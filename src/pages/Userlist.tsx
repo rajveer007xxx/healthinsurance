@@ -3,6 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { Search, Plus, DollarSign, Eye, Edit, RefreshCw, Send, MessageCircle, FileText, Trash2 } from 'lucide-react'
 import api from '../utils/api'
 import SendInvoiceModal from '../components/SendInvoiceModal'
+import CollectPaymentModal from '../components/CollectPaymentModal'
+import CreateComplaintModal from '../components/CreateComplaintModal'
+import RenewSubscriptionModal from '../components/RenewSubscriptionModal'
+import EditCustomerModal from '../components/EditCustomerModal'
+import TransactionsModal from '../components/TransactionsModal'
 
 interface Customer {
   id: number
@@ -43,6 +48,11 @@ export default function Userlist() {
   const [filterExpiryDate, setFilterExpiryDate] = useState('')
   const [selectedLetter, setSelectedLetter] = useState('All')
   const [showInvoiceModal, setShowInvoiceModal] = useState(false)
+  const [showCollectPaymentModal, setShowCollectPaymentModal] = useState(false)
+  const [showCreateComplaintModal, setShowCreateComplaintModal] = useState(false)
+  const [showRenewSubscriptionModal, setShowRenewSubscriptionModal] = useState(false)
+  const [showEditCustomerModal, setShowEditCustomerModal] = useState(false)
+  const [showTransactionsModal, setShowTransactionsModal] = useState(false)
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null)
@@ -73,19 +83,23 @@ export default function Userlist() {
   }
 
   const handleCollectPayment = (customer: Customer) => {
-    navigate(`/admin/payments/collect/${customer.id}`)
+    setSelectedCustomer(customer)
+    setShowCollectPaymentModal(true)
   }
 
   const handleViewTransactions = (customer: Customer) => {
-    navigate(`/admin/transactions?customer_id=${customer.id}`)
+    setSelectedCustomer(customer)
+    setShowTransactionsModal(true)
   }
 
   const handleEditCustomer = (customer: Customer) => {
-    navigate(`/admin/customers/edit/${customer.id}`)
+    setSelectedCustomer(customer)
+    setShowEditCustomerModal(true)
   }
 
   const handleRenewSubscription = (customer: Customer) => {
-    navigate(`/admin/customers/renew/${customer.id}`)
+    setSelectedCustomer(customer)
+    setShowRenewSubscriptionModal(true)
   }
 
   const handleSendPaymentLink = async (customer: Customer) => {
@@ -99,7 +113,8 @@ export default function Userlist() {
   }
 
   const handleCreateComplaint = (customer: Customer) => {
-    navigate(`/admin/complaints/create?customer_id=${customer.id}`)
+    setSelectedCustomer(customer)
+    setShowCreateComplaintModal(true)
   }
 
   const handleSendWhatsApp = async (customer: Customer) => {
@@ -420,6 +435,55 @@ export default function Userlist() {
           setSelectedCustomer(null)
         }}
         preSelectedCustomer={selectedCustomer}
+      />
+
+      <CollectPaymentModal
+        isOpen={showCollectPaymentModal}
+        onClose={() => {
+          setShowCollectPaymentModal(false)
+          setSelectedCustomer(null)
+        }}
+        customer={selectedCustomer}
+        onSuccess={fetchCustomers}
+      />
+
+      <CreateComplaintModal
+        isOpen={showCreateComplaintModal}
+        onClose={() => {
+          setShowCreateComplaintModal(false)
+          setSelectedCustomer(null)
+        }}
+        customer={selectedCustomer}
+        onSuccess={fetchCustomers}
+      />
+
+      <RenewSubscriptionModal
+        isOpen={showRenewSubscriptionModal}
+        onClose={() => {
+          setShowRenewSubscriptionModal(false)
+          setSelectedCustomer(null)
+        }}
+        customer={selectedCustomer}
+        onSuccess={fetchCustomers}
+      />
+
+      <EditCustomerModal
+        isOpen={showEditCustomerModal}
+        onClose={() => {
+          setShowEditCustomerModal(false)
+          setSelectedCustomer(null)
+        }}
+        customerId={selectedCustomer?.id || 0}
+        onSuccess={fetchCustomers}
+      />
+
+      <TransactionsModal
+        isOpen={showTransactionsModal}
+        onClose={() => {
+          setShowTransactionsModal(false)
+          setSelectedCustomer(null)
+        }}
+        customer={selectedCustomer}
       />
 
       {showDeleteConfirm && (
