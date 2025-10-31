@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import AdminLayout from '../components/AdminLayout'
 import api from '../utils/api'
 import { Download } from 'lucide-react'
 
@@ -128,7 +127,7 @@ export default function TransactionHistory() {
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
 
   return (
-    <AdminLayout>
+
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
@@ -361,6 +360,6 @@ export default function TransactionHistory() {
           </div>
         </div>
       </div>
-    </AdminLayout>
+
   )
 }

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Download, Trash2, Send } from 'lucide-react'
 import api from '../utils/api'
-import AdminLayout from '../components/AdminLayout'
 
 interface Invoice {
   id: number
@@ -142,7 +141,7 @@ const SendInvoiceList: React.FC = () => {
       )
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-1 w-full">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-1">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Send Invoice List</h1>
@@ -320,7 +319,7 @@ const SendInvoiceList: React.FC = () => {
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </>
   )
 }
 

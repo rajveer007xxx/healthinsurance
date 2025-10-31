@@ -2,12 +2,24 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search, Plus, DollarSign, Eye, Edit, RefreshCw, Send, MessageCircle, FileText, Trash2 } from 'lucide-react'
 import api from '../utils/api'
+import SendInvoiceModal from '../components/SendInvoiceModal'
+import CollectPaymentModal from '../components/CollectPaymentModal'
+import CreateComplaintModal from '../components/CreateComplaintModal'
+import RenewSubscriptionModal from '../components/RenewSubscriptionModal'
+import EditCustomerModal from '../components/EditCustomerModal'
+import TransactionsModal from '../components/TransactionsModal'
+import SendPaymentLinkModal from '../components/SendPaymentLinkModal'
 
 interface Customer {
   id: number
   customer_id: string
   full_name: string
   mobile: string
+  email?: string
+  address?: string
+  city?: string
+  state?: string
+  pincode?: string
   status: string
   plan_name: string
   plan_amount: number
@@ -36,6 +48,16 @@ export default function Userlist() {
   const [filterServiceType, setFilterServiceType] = useState('both')
   const [filterExpiryDate, setFilterExpiryDate] = useState('')
   const [selectedLetter, setSelectedLetter] = useState('All')
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false)
+  const [showCollectPaymentModal, setShowCollectPaymentModal] = useState(false)
+  const [showCreateComplaintModal, setShowCreateComplaintModal] = useState(false)
+  const [showRenewSubscriptionModal, setShowRenewSubscriptionModal] = useState(false)
+  const [showEditCustomerModal, setShowEditCustomerModal] = useState(false)
+  const [showTransactionsModal, setShowTransactionsModal] = useState(false)
+  const [showSendPaymentLinkModal, setShowSendPaymentLinkModal] = useState(false)
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null)
 
   useEffect(() => {
     fetchCustomers()
@@ -59,6 +81,71 @@ export default function Userlist() {
       setLocalities(response.data)
     } catch (error) {
       console.error('Error fetching localities:', error)
+    }
+  }
+
+  const handleCollectPayment = (customer: Customer) => {
+    setSelectedCustomer(customer)
+    setShowCollectPaymentModal(true)
+  }
+
+  const handleViewTransactions = (customer: Customer) => {
+    setSelectedCustomer(customer)
+    setShowTransactionsModal(true)
+  }
+
+  const handleEditCustomer = (customer: Customer) => {
+    setSelectedCustomer(customer)
+    setShowEditCustomerModal(true)
+  }
+
+  const handleRenewSubscription = (customer: Customer) => {
+    setSelectedCustomer(customer)
+    setShowRenewSubscriptionModal(true)
+  }
+
+  const handleSendPaymentLink = (customer: Customer) => {
+    setSelectedCustomer(customer)
+    setShowSendPaymentLinkModal(true)
+  }
+
+  const handleCreateComplaint = (customer: Customer) => {
+    setSelectedCustomer(customer)
+    setShowCreateComplaintModal(true)
+  }
+
+  const handleSendWhatsApp = async (customer: Customer) => {
+    try {
+      await api.post(`/customers/${customer.id}/send-whatsapp`)
+      alert('WhatsApp message sent successfully!')
+    } catch (error) {
+      console.error('Error sending WhatsApp:', error)
+      alert('Failed to send WhatsApp message')
+    }
+  }
+
+  const handleSendInvoice = (customer: Customer) => {
+    setSelectedCustomer(customer)
+    setShowInvoiceModal(true)
+  }
+
+  const handleDeleteClick = (customer: Customer) => {
+    setCustomerToDelete(customer)
+    setShowDeleteConfirm(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (customerToDelete) {
+      try {
+        await api.delete(`/customers/${customerToDelete.id}`)
+        await fetchCustomers()
+        setShowDeleteConfirm(false)
+        setCustomerToDelete(null)
+        alert('Customer deleted successfully!')
+      } catch (error) {
+        console.error('Error deleting customer:', error)
+        alert('Failed to delete customer')
+      }
     }
   }
 
@@ -203,72 +290,108 @@ export default function Userlist() {
           <table className="min-w-full">
             <thead className="bg-black text-white">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Cust ID</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Cust Name</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Mobile</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Plan</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Amount</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Received</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Balance</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Exp. Date</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
+                <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider">Cust ID</th>
+                <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider">Cust Name</th>
+                <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider">Mobile</th>
+                <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider">Status</th>
+                <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider">Plan</th>
+                <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider">Amount</th>
+                <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider">Received</th>
+                <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider">Balance</th>
+                <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider">Exp. Date</th>
+                <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredCustomers.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="px-4 py-8 text-center text-gray-500">
+                  <td colSpan={10} className="px-2 py-8 text-center text-gray-500">
                     {loading ? 'Loading...' : 'Showing 1 to 0 of 0 entries'}
                   </td>
                 </tr>
               ) : (
                 filteredCustomers.map((customer) => (
                   <tr key={customer.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{customer.customer_id}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{customer.full_name}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{customer.mobile}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm">
+                    <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">{customer.customer_id}</td>
+                    <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">{customer.full_name}</td>
+                    <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">{customer.mobile}</td>
+                    <td className="px-2 py-3 whitespace-nowrap text-sm">
                       <span className={`px-2 py-1 text-xs font-semibold rounded ${
                         customer.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>
                         {customer.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{customer.plan_name}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">₹{customer.plan_amount}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">₹{customer.received_amount || 0}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">₹{customer.balance || 0}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">{customer.plan_name}</td>
+                    <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">₹{customer.plan_amount}</td>
+                    <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">₹{customer.received_amount || 0}</td>
+                    <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">₹{customer.balance || 0}</td>
+                    <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">
                       {customer.expiry_date ? new Date(customer.expiry_date).toLocaleDateString('en-GB').replace(/\//g, '/') : '-'}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm">
+                    <td className="px-2 py-3 whitespace-nowrap text-sm">
                       <div className="flex gap-1">
-                        <button className="text-blue-600 hover:text-blue-800 p-1" title="Collect Payment">
+                        <button 
+                          onClick={() => handleCollectPayment(customer)}
+                          className="text-blue-600 hover:text-blue-800 p-1" 
+                          title="Collect Payment"
+                        >
                           <DollarSign className="h-4 w-4" />
                         </button>
-                        <button className="text-teal-600 hover:text-teal-800 p-1" title="View Transactions">
+                        <button 
+                          onClick={() => handleViewTransactions(customer)}
+                          className="text-teal-600 hover:text-teal-800 p-1" 
+                          title="View Transactions"
+                        >
                           <Eye className="h-4 w-4" />
                         </button>
-                        <button className="text-green-600 hover:text-green-800 p-1" title="Edit Customer">
+                        <button 
+                          onClick={() => handleEditCustomer(customer)}
+                          className="text-green-600 hover:text-green-800 p-1" 
+                          title="Edit Customer"
+                        >
                           <Edit className="h-4 w-4" />
                         </button>
-                        <button className="text-purple-600 hover:text-purple-800 p-1" title="Renew Subscription">
+                        <button 
+                          onClick={() => handleRenewSubscription(customer)}
+                          className="text-purple-600 hover:text-purple-800 p-1" 
+                          title="Renew Subscription"
+                        >
                           <RefreshCw className="h-4 w-4" />
                         </button>
-                        <button className="text-indigo-600 hover:text-indigo-800 p-1" title="Send Payment Link">
+                        <button 
+                          onClick={() => handleSendPaymentLink(customer)}
+                          className="text-indigo-600 hover:text-indigo-800 p-1" 
+                          title="Send Payment Link"
+                        >
                           <Send className="h-4 w-4" />
                         </button>
-                        <button className="text-orange-600 hover:text-orange-800 p-1" title="Create Complaint">
+                        <button 
+                          onClick={() => handleCreateComplaint(customer)}
+                          className="text-orange-600 hover:text-orange-800 p-1" 
+                          title="Create Complaint"
+                        >
                           <MessageCircle className="h-4 w-4" />
                         </button>
-                        <button className="text-green-600 hover:text-green-800 p-1" title="Send WhatsApp">
+                        <button 
+                          onClick={() => handleSendWhatsApp(customer)}
+                          className="text-green-600 hover:text-green-800 p-1" 
+                          title="Send WhatsApp"
+                        >
                           <MessageCircle className="h-4 w-4" />
                         </button>
-                        <button className="text-yellow-600 hover:text-yellow-800 p-1" title="Addon Bill">
+                        <button 
+                          onClick={() => handleSendInvoice(customer)}
+                          className="text-yellow-600 hover:text-yellow-800 p-1" 
+                          title="Send Invoice"
+                        >
                           <FileText className="h-4 w-4" />
                         </button>
-                        <button className="text-red-600 hover:text-red-800 p-1" title="Delete Customer">
+                        <button 
+                          onClick={() => handleDeleteClick(customer)}
+                          className="text-red-600 hover:text-red-800 p-1" 
+                          title="Delete Customer"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
@@ -301,6 +424,102 @@ export default function Userlist() {
           </div>
         </div>
       </div>
+
+      <SendInvoiceModal
+        isOpen={showInvoiceModal}
+        onClose={() => {
+          setShowInvoiceModal(false)
+          setSelectedCustomer(null)
+        }}
+        preSelectedCustomer={selectedCustomer}
+      />
+
+      <CollectPaymentModal
+        isOpen={showCollectPaymentModal}
+        onClose={() => {
+          setShowCollectPaymentModal(false)
+          setSelectedCustomer(null)
+        }}
+        customer={selectedCustomer}
+        onSuccess={fetchCustomers}
+      />
+
+      <CreateComplaintModal
+        isOpen={showCreateComplaintModal}
+        onClose={() => {
+          setShowCreateComplaintModal(false)
+          setSelectedCustomer(null)
+        }}
+        customer={selectedCustomer}
+        onSuccess={fetchCustomers}
+      />
+
+      <RenewSubscriptionModal
+        isOpen={showRenewSubscriptionModal}
+        onClose={() => {
+          setShowRenewSubscriptionModal(false)
+          setSelectedCustomer(null)
+        }}
+        customer={selectedCustomer}
+        onSuccess={fetchCustomers}
+      />
+
+      <EditCustomerModal
+        isOpen={showEditCustomerModal}
+        onClose={() => {
+          setShowEditCustomerModal(false)
+          setSelectedCustomer(null)
+        }}
+        customerId={selectedCustomer?.id || 0}
+        onSuccess={fetchCustomers}
+      />
+
+      <TransactionsModal
+        isOpen={showTransactionsModal}
+        onClose={() => {
+          setShowTransactionsModal(false)
+          setSelectedCustomer(null)
+        }}
+        customer={selectedCustomer}
+      />
+
+      <SendPaymentLinkModal
+        isOpen={showSendPaymentLinkModal}
+        onClose={() => {
+          setShowSendPaymentLinkModal(false)
+          setSelectedCustomer(null)
+        }}
+        customer={selectedCustomer}
+        onSuccess={fetchCustomers}
+      />
+
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Confirm Delete</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete customer "{customerToDelete?.full_name}"? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false)
+                  setCustomerToDelete(null)
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

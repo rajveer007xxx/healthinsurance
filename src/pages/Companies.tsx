@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import AdminLayout from '../components/AdminLayout'
 import { Plus, Edit, Trash, X } from 'lucide-react'
 import api from '../utils/api'
 
@@ -91,7 +90,7 @@ export default function Companies() {
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
@@ -245,6 +244,6 @@ export default function Companies() {
           </div>
         </div>
       )}
-    </AdminLayout>
+    </>
   )
 }

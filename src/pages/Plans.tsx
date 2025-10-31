@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Plus, Edit, Trash2 } from 'lucide-react'
 import api from '../utils/api'
+import PlanModal from '../components/PlanModal'
 
 interface Plan {
   id: number
@@ -12,11 +13,18 @@ interface Plan {
   total_amount: number
   validity: string
   status: string
+  cgst_percentage?: number
+  sgst_percentage?: number
+  igst_percentage?: number
 }
 
 export default function Plans() {
   const [plans, setPlans] = useState<Plan[]>([])
   const [loading, setLoading] = useState(true)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [planToDelete, setPlanToDelete] = useState<Plan | null>(null)
 
   useEffect(() => {
     fetchPlans()
@@ -33,6 +41,44 @@ export default function Plans() {
     }
   }
 
+  const handleAddPlan = () => {
+    setSelectedPlan(null)
+    setIsModalOpen(true)
+  }
+
+  const handleEditPlan = (plan: Plan) => {
+    setSelectedPlan(plan)
+    setIsModalOpen(true)
+  }
+
+  const handleSavePlan = async (planData: any) => {
+    if (selectedPlan) {
+      await api.put(`/plans/${selectedPlan.id}`, planData)
+    } else {
+      await api.post('/plans/', planData)
+    }
+    await fetchPlans()
+  }
+
+  const handleDeleteClick = (plan: Plan) => {
+    setPlanToDelete(plan)
+    setShowDeleteConfirm(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (planToDelete) {
+      try {
+        await api.delete(`/plans/${planToDelete.id}`)
+        await fetchPlans()
+        setShowDeleteConfirm(false)
+        setPlanToDelete(null)
+      } catch (error) {
+        console.error('Error deleting plan:', error)
+        alert('Failed to delete plan')
+      }
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -45,11 +91,49 @@ export default function Plans() {
     <div>
       <div className="mb-4 flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Plans Management</h1>
-        <button className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">
+        <button 
+          onClick={handleAddPlan}
+          className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700"
+        >
           <Plus className="h-4 w-4" />
           Add Plan
         </button>
       </div>
+
+      <PlanModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSavePlan}
+        plan={selectedPlan || undefined}
+      />
+
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Confirm Delete</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete the plan "{planToDelete?.plan_name}"? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false)
+                  setPlanToDelete(null)
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="bg-white rounded shadow overflow-hidden">
         <div className="overflow-x-auto">
@@ -91,10 +175,18 @@ export default function Plans() {
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm">
                       <div className="flex gap-2">
-                        <button className="text-blue-600 hover:text-blue-800 p-1" title="Edit Plan">
+                        <button 
+                          onClick={() => handleEditPlan(plan)}
+                          className="text-blue-600 hover:text-blue-800 p-1" 
+                          title="Edit Plan"
+                        >
                           <Edit className="h-4 w-4" />
                         </button>
-                        <button className="text-red-600 hover:text-red-800 p-1" title="Delete Plan">
+                        <button 
+                          onClick={() => handleDeleteClick(plan)}
+                          className="text-red-600 hover:text-red-800 p-1" 
+                          title="Delete Plan"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>

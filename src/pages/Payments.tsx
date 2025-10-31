@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import AdminLayout from '../components/AdminLayout'
 import api from '../utils/api'
 
 interface Payment {
@@ -51,7 +50,7 @@ export default function Payments() {
   }
 
   return (
-    <AdminLayout>
+
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
@@ -113,6 +112,6 @@ export default function Payments() {
           </div>
         </div>
       </div>
-    </AdminLayout>
+
   )
 }
