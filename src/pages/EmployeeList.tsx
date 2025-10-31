@@ -29,7 +29,7 @@ const EmployeeList: React.FC = () => {
       if (searchTerm) params.search = searchTerm;
       if (statusFilter !== 'all') params.status_filter = statusFilter;
       
-      const response = await api.get('/employees', { params });
+      const response = await api.get('/employees/', { params });
       setEmployees(response.data.employees || []);
     } catch (error) {
       console.error('Error fetching employees:', error);

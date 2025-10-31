@@ -25,7 +25,7 @@ const EditEmployee: React.FC = () => {
   const fetchEmployee = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/employees/${id}`);
+      const response = await api.get(`/employees/${id}/`);
       const employee = response.data;
       
       setFormData({
@@ -71,7 +71,7 @@ const EditEmployee: React.FC = () => {
         updateData.password = formData.password;
       }
       
-      await api.put(`/employees/${id}`, updateData);
+      await api.put(`/employees/${id}/`, updateData);
       alert('Employee updated successfully!');
       window.location.href = '/admin/employees';
     } catch (error: any) {

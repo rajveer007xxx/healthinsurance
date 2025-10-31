@@ -35,7 +35,7 @@ const CreateEmployee: React.FC = () => {
 
     setLoading(true);
     try {
-      await api.post('/employees', {
+      await api.post('/employees/', {
         ...formData,
         permissions: Array.from(selectedPermissions)
       });
