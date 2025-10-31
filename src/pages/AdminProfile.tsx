@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import AdminLayout from '../components/AdminLayout'
 import { Save, User, Mail, Phone, Lock, Upload } from 'lucide-react'
 import api from '../utils/api'
 
@@ -101,7 +100,6 @@ export default function AdminProfile() {
   }
 
   return (
-    <AdminLayout>
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Edit Profile</h1>
@@ -254,6 +252,5 @@ export default function AdminProfile() {
           </div>
         </div>
       </div>
-    </AdminLayout>
   )
 }

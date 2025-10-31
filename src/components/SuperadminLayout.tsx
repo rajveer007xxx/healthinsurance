@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface SuperadminLayoutProps {
   children: React.ReactNode;
@@ -102,10 +102,10 @@ const SuperadminLayout: React.FC<SuperadminLayoutProps> = ({ children }) => {
         {/* Menu Items */}
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
           {menuItems.map((item) => (
-            <Link
+            <button
               key={item.path}
-              to={item.path}
-              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              onClick={() => navigate(item.path)}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                 isActive(item.path)
                   ? 'bg-white text-purple-900 shadow-lg'
                   : 'text-purple-100 hover:bg-purple-800'
@@ -117,7 +117,7 @@ const SuperadminLayout: React.FC<SuperadminLayoutProps> = ({ children }) => {
               {sidebarOpen && (
                 <span className="font-medium">{item.name}</span>
               )}
-            </Link>
+            </button>
           ))}
         </nav>
 

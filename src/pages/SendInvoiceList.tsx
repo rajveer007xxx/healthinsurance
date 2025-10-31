@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Download, Trash2, Send } from 'lucide-react'
 import api from '../utils/api'
-import AdminLayout from '../components/AdminLayout'
 
 interface Invoice {
   id: number
@@ -11,6 +10,8 @@ interface Invoice {
     customer_id: string
     full_name: string
     service_type: string
+    locality_id: number | null
+    locality_name: string | null
   }
   invoice_date: string
   total_amount: number
@@ -21,15 +22,24 @@ interface Invoice {
   created_at: string
 }
 
+interface Locality {
+  id: number
+  name: string
+}
+
 const SendInvoiceList: React.FC = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([])
+  const [localities, setLocalities] = useState<Locality[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState('Both')
+  const [selectedLocality, setSelectedLocality] = useState('All')
+  const [selectedServiceType, setSelectedServiceType] = useState('Both')
   const [selectedMonth, setSelectedMonth] = useState('')
 
   useEffect(() => {
     fetchInvoices()
+    fetchLocalities()
   }, [])
 
   const fetchInvoices = async () => {
@@ -42,6 +52,15 @@ const SendInvoiceList: React.FC = () => {
       alert('Error fetching invoices')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchLocalities = async () => {
+    try {
+      const response = await api.get('/localities/')
+      setLocalities(response.data)
+    } catch (error) {
+      console.error('Error fetching localities:', error)
     }
   }
 
@@ -123,10 +142,18 @@ const SendInvoiceList: React.FC = () => {
       filterType === 'Both' || 
       invoice.sent_type === filterType.toUpperCase()
     
+    const matchesLocality = 
+      selectedLocality === 'All' || 
+      (invoice.customer.locality_id && invoice.customer.locality_id.toString() === selectedLocality)
+    
+    const matchesServiceType = 
+      selectedServiceType === 'Both' || 
+      invoice.customer.service_type === selectedServiceType
+    
     const matchesMonth = !selectedMonth || 
       invoice.invoice_date.startsWith(selectedMonth)
     
-    return matchesSearch && matchesType && matchesMonth
+    return matchesSearch && matchesType && matchesLocality && matchesServiceType && matchesMonth
   })
 
   const getAlphabetLetters = () => {
@@ -142,16 +169,45 @@ const SendInvoiceList: React.FC = () => {
       )
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-1 w-full">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-1">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Send Invoice List</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Invoice List History</h1>
         </div>
 
         <div className="bg-white shadow p-2 border border-gray-300">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-0.5">Filter Type</label>
+              <label className="block text-sm font-medium text-gray-700 mb-0.5">Locality</label>
+              <select
+                value={selectedLocality}
+                onChange={(e) => setSelectedLocality(e.target.value)}
+                className="w-full px-2 py-1 border border-gray-300 text-sm"
+              >
+                <option value="All">All</option>
+                {localities.map(locality => (
+                  <option key={locality.id} value={locality.id.toString()}>
+                    {locality.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-0.5">Service Type</label>
+              <select
+                value={selectedServiceType}
+                onChange={(e) => setSelectedServiceType(e.target.value)}
+                className="w-full px-2 py-1 border border-gray-300 text-sm"
+              >
+                <option>Both</option>
+                <option>PREPAID</option>
+                <option>POSTPAID</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-0.5">Sent Type</label>
               <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
@@ -320,7 +376,7 @@ const SendInvoiceList: React.FC = () => {
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </>
   )
 }
 

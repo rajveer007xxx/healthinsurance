@@ -1,14 +1,10 @@
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, Outlet } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { LayoutDashboard, Users, Package, History, Receipt, AlertCircle, Bell, BarChart3, UsersIcon, UserPlus, Database, ClipboardList, Wallet, RefreshCw, Trash2, Settings, LogOut, UserCircle, ChevronDown, ChevronLeft, ChevronRight, MessageCircle, FileText } from 'lucide-react'
+import { LayoutDashboard, Users, Package, History, Receipt, AlertCircle, Bell, BarChart3, UsersIcon, UserPlus, Database, ClipboardList, Wallet, RefreshCw, Trash2, Settings, LogOut, UserCircle, ChevronDown, ChevronLeft, ChevronRight, MessageCircle, FileText, MapPin } from 'lucide-react'
 import api from '../utils/api'
 import { useSessionTimeout } from '../hooks/useSessionTimeout'
 
-interface AdminLayoutProps {
-  children: React.ReactNode
-}
-
-export default function AdminLayout({ children }: AdminLayoutProps) {
+export default function AdminLayout() {
   const navigate = useNavigate()
   const location = useLocation()
   const [showProfileMenu, setShowProfileMenu] = useState(false)
@@ -24,6 +20,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     fetchAdminProfile()
     fetchSettings()
   }, [])
+
+  useEffect(() => {
+    console.log('AdminLayout - Current path:', location.pathname)
+  }, [location])
 
   const fetchAdminProfile = async () => {
     try {
@@ -57,24 +57,26 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   const menuItems = [
-    { path: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/admin/customers', icon: Users, label: 'Userlist' },
-    { path: '/admin/plans', icon: Package, label: 'Plans' },
-    { path: '/admin/transactions', icon: History, label: 'Payment History' },
-    { path: '/admin/send-invoices', icon: Receipt, label: 'Send Manual Invoice' },
-    { path: '/admin/complaints', icon: AlertCircle, label: 'Complaints List' },
-    { path: '/admin/notifications', icon: Bell, label: 'Notifications' },
-    { path: '/admin/reports', icon: BarChart3, label: 'Reports' },
-    { path: '/admin/whatsapp-campaign', icon: MessageCircle, label: 'Whatsapp Campaign' },
-    { path: '/admin/whatsapp-templates', icon: FileText, label: 'Whatsapp Templates' },
-    { path: '/admin/employees', icon: UsersIcon, label: 'Employee Management' },
-    { path: '/admin/customer-distribution', icon: UserPlus, label: 'Customer Distribution' },
-    { path: '/admin/data-management', icon: Database, label: 'Data Management' },
-    { path: '/admin/connection-requests', icon: ClipboardList, label: 'Connection Request' },
-    { path: '/admin/expenses', icon: Wallet, label: 'Expense List' },
-    { path: '/admin/refunds', icon: RefreshCw, label: 'Refund List' },
-    { path: '/admin/deleted-users', icon: Trash2, label: 'Deleted Users' },
-    { path: '/admin/payment-gateways', icon: Settings, label: 'Payment Gateways' },
+    { path: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { path: 'customers', icon: Users, label: 'Userlist' },
+    { path: 'plans', icon: Package, label: 'Plans' },
+    { path: 'transactions', icon: History, label: 'Payment History' },
+    { path: 'send-invoices', icon: Receipt, label: 'Send Manual Invoice' },
+    { path: 'invoice-list-history', icon: FileText, label: 'Invoice List History' },
+    { path: 'complaints', icon: AlertCircle, label: 'Complaints List' },
+    { path: 'notifications', icon: Bell, label: 'Notifications' },
+    { path: 'reports', icon: BarChart3, label: 'Reports' },
+    { path: 'whatsapp-campaign', icon: MessageCircle, label: 'Whatsapp Campaign' },
+    { path: 'whatsapp-templates', icon: FileText, label: 'Whatsapp Templates' },
+    { path: 'employees', icon: UsersIcon, label: 'Employee Management' },
+    { path: 'track-employee', icon: MapPin, label: 'Track Employee' },
+    { path: 'customer-distribution', icon: UserPlus, label: 'Customer Distribution' },
+    { path: 'data-management', icon: Database, label: 'Data Management' },
+    { path: 'connection-requests', icon: ClipboardList, label: 'Connection Request' },
+    { path: 'expenses', icon: Wallet, label: 'Expense List' },
+    { path: 'refunds', icon: RefreshCw, label: 'Refund List' },
+    { path: 'deleted-users', icon: Trash2, label: 'Deleted Users' },
+    { path: 'payment-gateways', icon: Settings, label: 'Payment Gateways' },
   ]
 
   return (
@@ -175,11 +177,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <nav className="px-2 py-2 overflow-y-auto flex-1">
             {menuItems.map((item) => {
               const Icon = item.icon
-              const isActive = location.pathname === item.path
+              const isActive = location.pathname === `/admin/${item.path}`
               return (
                 <button
                   key={item.path}
-                  onClick={() => navigate(item.path)}
+                  onClick={() => navigate(`/admin/${item.path}`)}
                   className={`w-full flex items-center ${sidebarMinimized ? 'justify-center px-2' : 'px-3'} py-2 text-sm font-medium border border-teal-700 mb-1 rounded transition-all duration-200 ${
                     isActive
                       ? 'bg-teal-500 text-white font-bold'
@@ -198,7 +200,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* Main Content Area */}
         <main className="flex-1 bg-gray-100 p-4 md:p-6 overflow-x-hidden">
           <div className="max-w-full">
-            {children}
+            <Outlet />
           </div>
         </main>
       </div>
