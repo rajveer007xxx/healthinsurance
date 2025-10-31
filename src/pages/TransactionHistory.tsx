@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import AdminLayout from '../components/AdminLayout'
 import api from '../utils/api'
 import { Download } from 'lucide-react'
 
@@ -52,7 +51,7 @@ export default function TransactionHistory() {
     try {
       setLoading(true)
       const [transactionsRes, localitiesRes, employeesRes] = await Promise.all([
-        api.get('/payments/'),
+        api.get('/transactions/'),
         api.get('/localities/'),
         api.get('/users/')
       ])
@@ -100,6 +99,17 @@ export default function TransactionHistory() {
     })
   }
 
+  const formatTime = (dateString: string) => {
+    if (!dateString) return ''
+    const date = new Date(dateString)
+    return date.toLocaleString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    })
+  }
+
   const formatAmount = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -128,7 +138,7 @@ export default function TransactionHistory() {
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
 
   return (
-    <AdminLayout>
+
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
@@ -243,68 +253,88 @@ export default function TransactionHistory() {
 
         <div className="bg-white shadow-sm border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-[#448996] text-white">
+            <table className="min-w-full border border-black">
+              <thead className="bg-white border-b-2 border-black">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Date</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Transaction ID</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Type</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Description</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Collected/Added</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Amount</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">After Balance</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Action</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-700 border border-black">Sl. No.</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-700 border border-black">Date</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-700 border border-black">Time</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-700 border border-black">TXN/Payment ID</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-700 border border-black">Type</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-700 border border-black">Description</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-700 border border-black">Collected/Added</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-700 border border-black">Amount</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-700 border border-black">Debit/Credit</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-700 border border-black">Action</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white">
                 {loading ? (
                   <tr>
-                    <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
+                    <td colSpan={10} className="px-4 py-8 text-center text-gray-500 border border-black">
                       Loading...
                     </td>
                   </tr>
                 ) : paginatedTransactions.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
+                    <td colSpan={10} className="px-4 py-8 text-center text-gray-500 border border-black">
                       No transactions found
                     </td>
                   </tr>
                 ) : (
-                  paginatedTransactions.map((transaction) => (
-                    <tr key={transaction.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                        {formatDate(transaction.transaction_date)}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                        {transaction.transaction_id}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                        {transaction.transaction_type}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        {transaction.description || `${transaction.customer_name} (${transaction.customer_phone})`}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                        {transaction.collector_name || 'Admin'}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {formatAmount(transaction.amount)}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                        {formatAmount(transaction.balance_after)}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm">
-                        <button
-                          onClick={() => downloadReceipt(transaction.transaction_id)}
-                          className="inline-flex items-center gap-1 px-3 py-1 bg-[#448996] text-white rounded hover:bg-[#357580] transition-colors"
-                          title="Download Receipt"
-                        >
-                          <Download className="h-4 w-4" />
-                          Download Receipt
-                        </button>
-                      </td>
-                    </tr>
-                  ))
+                  paginatedTransactions.map((transaction, index) => {
+                    const isPayment = transaction.transaction_type === 'PAYMENT'
+                    return (
+                      <tr key={transaction.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-center text-gray-900 border border-black">
+                          {startIndex + index + 1}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-center text-gray-900 border border-black">
+                          {formatDate(transaction.transaction_date)}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-center text-gray-900 border border-black">
+                          {formatTime(transaction.transaction_date)}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-center text-gray-900 border border-black">
+                          {transaction.transaction_id}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-center text-gray-900 border border-black">
+                          {transaction.transaction_type}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-center text-gray-900 border border-black">
+                          {transaction.description || `${transaction.customer_name} (${transaction.customer_phone})`}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-center text-gray-900 border border-black">
+                          {transaction.collector_name || 'Admin'}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-center font-medium text-gray-900 border border-black">
+                          {formatAmount(transaction.amount)}
+                        </td>
+                        <td className={`px-4 py-3 whitespace-nowrap text-sm text-center font-medium border border-black ${isPayment ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                          {isPayment ? 'Payment' : 'Debit'}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-center border border-black">
+                          <div className="flex gap-2 justify-center">
+                            <button
+                              onClick={() => downloadReceipt(transaction.transaction_id)}
+                              className="inline-flex items-center gap-1 px-2 py-1 bg-[#448996] text-white rounded hover:bg-[#357580] transition-colors text-xs"
+                              title="Download"
+                            >
+                              <Download className="h-3 w-3" />
+                              Download
+                            </button>
+                            <button
+                              onClick={() => alert('Email functionality coming soon')}
+                              className="inline-flex items-center gap-1 px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-xs"
+                              title="Email"
+                            >
+                              Email
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })
                 )}
               </tbody>
             </table>
@@ -361,6 +391,6 @@ export default function TransactionHistory() {
           </div>
         </div>
       </div>
-    </AdminLayout>
+
   )
 }
