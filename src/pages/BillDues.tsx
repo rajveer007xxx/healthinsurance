@@ -1,4 +1,3 @@
-import AdminLayout from '../components/AdminLayout'
 import { useState, useEffect } from 'react'
 import api from '../utils/api'
 import { DollarSign, History, Send, FileText, X } from 'lucide-react'
@@ -153,7 +152,7 @@ export default function BillDues() {
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-900">Bill Dues</h1>
@@ -446,6 +445,6 @@ export default function BillDues() {
           </div>
         </div>
       )}
-    </AdminLayout>
+    </>
   )
 }

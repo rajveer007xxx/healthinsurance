@@ -773,7 +773,7 @@ def get_expiring_next_3_days(db: Session = Depends(get_db)):
     return customers
 
 @router.post("/{customer_id}/send-payment-link")
-def send_payment_link(customer_id: int, db: Session = Depends(get_db)):
+def send_payment_link(customer_id: int, payment_data: dict, db: Session = Depends(get_db)):
     """Send payment reminder email to customer"""
     from app.utils.email_sender import send_payment_reminder_email
     from sqlalchemy import func
@@ -794,6 +794,9 @@ def send_payment_link(customer_id: int, db: Session = Depends(get_db)):
     if balance <= 0:
         raise HTTPException(status_code=400, detail="Customer has no pending balance")
     
+    discount = payment_data.get('discount', 0)
+    custom_message = payment_data.get('message', '')
+    
     payment_link = f"http://82.29.162.153/customer/payment/{customer.customer_id}"
     
     try:
@@ -801,7 +804,9 @@ def send_payment_link(customer_id: int, db: Session = Depends(get_db)):
             to_email=customer.email,
             customer_name=customer.full_name,
             balance_amount=balance,
-            payment_link=payment_link
+            discount=discount,
+            payment_link=payment_link,
+            custom_message=custom_message
         )
         
         if success:

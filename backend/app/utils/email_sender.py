@@ -9,7 +9,9 @@ def send_payment_reminder_email(
     to_email: str,
     customer_name: str,
     balance_amount: float,
+    discount: float = 0,
     payment_link: str = "",
+    custom_message: str = "",
     smtp_host: str = "smtp.hostinger.com",
     smtp_port: int = 465,
     smtp_user: str = "no-reply@autoispbilling.com",
@@ -25,13 +27,24 @@ def send_payment_reminder_email(
     msg['To'] = to_email
     msg['Subject'] = 'Payment Reminder'
     
-    body = f"""Dear {customer_name},
+    if custom_message:
+        body = custom_message
+        body = body.replace('[Payment Link will be generated]', payment_link)
+    else:
+        amount_after_discount = balance_amount - discount
+        
+        body = f"""Dear {customer_name},
 
-Please pay your pending amount of ₹{balance_amount:.2f}.
+Your Total Due amount is: ₹{int(round(balance_amount))}."""
+        
+        if discount > 0:
+            body += f"""
+Discount: ₹{int(round(discount))}
+Amount after discount: ₹{int(round(amount_after_discount))}"""
+        
+        body += f"""
 
-Choose Online Mode or Pay through Cash to Collection Agents.
-
-{f'Payment Link: {payment_link}' if payment_link else ''}
+Please Pay to Cash Collection Agents or to make Payment online please use this link: {payment_link}
 
 Regards,
 ISPBILLING

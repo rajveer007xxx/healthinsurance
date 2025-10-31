@@ -22,10 +22,6 @@ const ManageAdmins: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [selectedAdmin, setSelectedAdmin] = useState<Admin | null>(null);
-  const [adminDetails, setAdminDetails] = useState<any>(null);
   
   const [formData, setFormData] = useState({
     username: '',
@@ -47,7 +43,6 @@ const ManageAdmins: React.FC = () => {
     terms_and_conditions: ''
   });
   
-  const [autoGenerate, setAutoGenerate] = useState(false);
 
   useEffect(() => {
     fetchAdmins();
@@ -80,16 +75,6 @@ const ManageAdmins: React.FC = () => {
     }
   };
 
-  const _fetchAdminDetails = async (adminId: number) => {
-    try {
-      const response = await api.get(`/superadmin/admins/${adminId}`);
-      setAdminDetails(response.data);
-      setShowViewModal(true);
-    } catch (error) {
-      console.error('Error fetching admin details:', error);
-      alert('Error fetching admin details');
-    }
-  };
 
   const handleAddAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,39 +107,6 @@ const ManageAdmins: React.FC = () => {
     }
   };
 
-  const _handleEditAdmin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedAdmin) return;
-    
-    try {
-      await api.put(`/superadmin/admins/${selectedAdmin.id}`, formData);
-      alert('Admin updated successfully!');
-      setShowEditModal(false);
-      setSelectedAdmin(null);
-      setFormData({
-        username: '',
-        email: '',
-        full_name: '',
-        phone: '',
-        password: '',
-        company_name: '',
-        company_address: '',
-        company_phone: '',
-        company_email: '',
-        company_gst: '',
-        company_state: '',
-        company_code: '',
-        bank_name: '',
-        account_number: '',
-        branch_ifsc: '',
-        declaration: '',
-        terms_and_conditions: ''
-      });
-      fetchAdmins();
-    } catch (error: any) {
-      alert(error.response?.data?.detail || 'Error updating admin');
-    }
-  };
 
   const handleToggleStatus = async (admin: Admin) => {
     if (!confirm(`Are you sure you want to ${admin.is_active ? 'deactivate' : 'activate'} ${admin.full_name}?`)) {
@@ -184,28 +136,8 @@ const ManageAdmins: React.FC = () => {
     }
   };
 
-  const openEditModal = (admin: Admin) => {
-    setSelectedAdmin(admin);
-    setFormData({
-      username: admin.username,
-      email: admin.email,
-      full_name: admin.full_name,
-      phone: admin.phone,
-      password: '',
-      company_name: '',
-      company_address: '',
-      company_phone: '',
-      company_email: '',
-      company_gst: '',
-      company_state: '',
-      company_code: '',
-      bank_name: '',
-      account_number: '',
-      branch_ifsc: '',
-      declaration: '',
-      terms_and_conditions: ''
-    });
-    setShowEditModal(true);
+  const openEditModal = (_admin: Admin) => {
+    alert('Edit functionality coming soon!');
   };
 
   return (

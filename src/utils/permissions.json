@@ -1,0 +1,130 @@
+{
+  "groups": [
+    {
+      "id": "feature",
+      "label": "Feature Accessibility",
+      "permissions": [
+        {
+          "code": "user_management",
+          "label": "User Management"
+        },
+        {
+          "code": "send_coupon",
+          "label": "Send Coupon"
+        },
+        {
+          "code": "revenue_list",
+          "label": "Revenue List"
+        },
+        {
+          "code": "data_management",
+          "label": "Data Management"
+        },
+        {
+          "code": "complaints",
+          "label": "Complaints"
+        },
+        {
+          "code": "transaction_history",
+          "label": "Transaction History"
+        },
+        {
+          "code": "invoice",
+          "label": "Invoice"
+        },
+        {
+          "code": "notification",
+          "label": "Notification"
+        },
+        {
+          "code": "bill_dues",
+          "label": "Bill Dues"
+        },
+        {
+          "code": "my_support_list",
+          "label": "My Support List"
+        },
+        {
+          "code": "get_paid",
+          "label": "Get Paid"
+        }
+      ]
+    },
+    {
+      "id": "app",
+      "label": "App Permission",
+      "permissions": [
+        {
+          "code": "subscriber",
+          "label": "Subscriber"
+        },
+        {
+          "code": "bill_due",
+          "label": "Bill Due"
+        },
+        {
+          "code": "get_paid_app",
+          "label": "Get Paid"
+        },
+        {
+          "code": "transaction",
+          "label": "Transaction"
+        },
+        {
+          "code": "complaint",
+          "label": "Complaint"
+        },
+        {
+          "code": "report",
+          "label": "Report"
+        }
+      ]
+    },
+    {
+      "id": "report_access",
+      "label": "Report Accessibility Permission",
+      "permissions": [
+        {
+          "code": "collection",
+          "label": "Collection"
+        },
+        {
+          "code": "amount_dues",
+          "label": "Amount Dues"
+        },
+        {
+          "code": "complaint_report",
+          "label": "Complaint"
+        },
+        {
+          "code": "total_subscriber",
+          "label": "Total Subscriber"
+        },
+        {
+          "code": "enrolment",
+          "label": "Enrolment"
+        },
+        {
+          "code": "churn_opt_out",
+          "label": "Churn/Opt-out"
+        },
+        {
+          "code": "subscriber_transaction_history",
+          "label": "Subscriber Transaction History"
+        },
+        {
+          "code": "general_ledger",
+          "label": "General Ledger"
+        },
+        {
+          "code": "near_by_expiry",
+          "label": "Near By Expiry"
+        },
+        {
+          "code": "recharges",
+          "label": "Recharges"
+        }
+      ]
+    }
+  ]
+}

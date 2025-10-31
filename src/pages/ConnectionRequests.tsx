@@ -1,4 +1,3 @@
-import AdminLayout from '../components/AdminLayout'
 import { useNavigate } from 'react-router-dom'
 import { Construction } from 'lucide-react'
 
@@ -6,7 +5,7 @@ export default function ConnectionRequests() {
   const navigate = useNavigate()
 
   return (
-    <AdminLayout>
+
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">
         <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
           <div className="mb-6 flex justify-center">
@@ -55,6 +54,6 @@ export default function ConnectionRequests() {
           </p>
         </div>
       </div>
-    </AdminLayout>
+
   )
 }

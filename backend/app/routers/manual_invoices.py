@@ -19,13 +19,10 @@ from email import encoders
 
 router = APIRouter()
 
-def generate_invoice_number() -> str:
-    """Generate 10-11 digit invoice number with MINV prefix"""
-    random_number = random.randint(1000000, 9999999)
-    invoice_number = f'MINV{random_number}'
-    if len(invoice_number) > 11:
-        invoice_number = invoice_number[:11]
-    return invoice_number
+def generate_invoice_number(db: Session) -> str:
+    """Generate 8 digit invoice number with ADB prefix"""
+    from app.utils.invoice_utils import generate_invoice_number as gen_invoice_num
+    return gen_invoice_num(db, prefix="ADB", digits=8)
 
 def generate_manual_invoice_pdf(invoice: ManualInvoice, settings: Settings) -> bytes:
     """Generate PDF for manual invoice"""
@@ -135,10 +132,10 @@ def generate_manual_invoice_pdf(invoice: ManualInvoice, settings: Settings) -> b
             items_data.append([
                 str(item['sl_no']),
                 item['particulars'],
-                item['hsn_code'],
-                str(item['quantity']),
-                f"₹{int(round(item['price']))}",
-                f"₹{int(round(item['final_price']))}"
+                item.get('hsn_code', ''),
+                str(item.get('quantity', 1)),
+                f"₹{int(round(item.get('price', 0)))}",
+                f"₹{int(round(item.get('final_price', 0)))}"
             ])
         
         items_data.append(['', '', '', '', 'Total', f"₹{int(round(invoice.subtotal))}"])
@@ -217,7 +214,7 @@ def generate_manual_invoice_pdf(invoice: ManualInvoice, settings: Settings) -> b
 def send_invoice_email(invoice: ManualInvoice, pdf_bytes: bytes, settings: Settings):
     """Send invoice email with PDF attachment"""
     try:
-        smtp_user = "billing@ispbilling.in"
+        smtp_user = "no-reply@autoispbilling.com"
         smtp_password = "Login@121212"
         smtp_server = "smtp.hostinger.com"
         smtp_port = 465
@@ -272,7 +269,7 @@ def create_manual_invoice(
         if not settings:
             settings = db.query(Settings).first()
         
-        invoice_number = generate_invoice_number()
+        invoice_number = generate_invoice_number(db)
         
         invoice_date = datetime.fromisoformat(invoice_data.get('invoice_date')) if invoice_data.get('invoice_date') else get_ist_now()
         due_date = datetime.fromisoformat(invoice_data.get('due_date')) if invoice_data.get('due_date') else (invoice_date + timedelta(days=30))
