@@ -21,6 +21,10 @@ export default function AdminLayout() {
     fetchSettings()
   }, [])
 
+  useEffect(() => {
+    console.log('AdminLayout - Current path:', location.pathname)
+  }, [location])
+
   const fetchAdminProfile = async () => {
     try {
       const token = localStorage.getItem('adminToken')
@@ -194,7 +198,7 @@ export default function AdminLayout() {
         {/* Main Content Area */}
         <main className="flex-1 bg-gray-100 p-4 md:p-6 overflow-x-hidden">
           <div className="max-w-full">
-            <Outlet key={location.pathname} />
+            <Outlet />
           </div>
         </main>
       </div>

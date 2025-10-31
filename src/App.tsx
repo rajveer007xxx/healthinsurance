@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import AdminLogin from './pages/AdminLogin'
 import Dashboard from './pages/Dashboard'
 import Userlist from './pages/Userlist'
@@ -23,16 +23,10 @@ import PaymentGateways from './pages/PaymentGateways'
 import Profile from './pages/Profile'
 import Settings from './pages/Settings'
 import AdminLayout from './components/AdminLayout'
+import RequireAuth from './components/RequireAuth'
 
 function App() {
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
-    return !!localStorage.getItem('adminToken')
-  })
-
-  useEffect(() => {
-    const adminToken = localStorage.getItem('adminToken')
-    if (adminToken) setIsAdminAuthenticated(true)
-  }, [])
+  const [, setIsAdminAuthenticated] = useState(false)
 
   return (
     <Router>
@@ -40,29 +34,31 @@ function App() {
         <Route path="/" element={<Navigate to="/admin/login" />} />
         <Route path="/admin/login" element={<AdminLogin setIsAuthenticated={setIsAdminAuthenticated} />} />
         
-        <Route path="/admin" element={isAdminAuthenticated ? <AdminLayout /> : <Navigate to="/admin/login" />}>
-          <Route index element={<Navigate to="dashboard" />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="customers" element={<Userlist />} />
-          <Route path="customers/add" element={<AddCustomer />} />
-          <Route path="plans" element={<Plans />} />
-          <Route path="transactions" element={<PaymentHistory />} />
-          <Route path="send-invoices" element={<SendInvoices />} />
-          <Route path="complaints" element={<Complaints />} />
-          <Route path="notifications" element={<Notifications />} />
-          <Route path="reports" element={<Reports />} />
-          <Route path="whatsapp-campaign" element={<WhatsappCampaign />} />
-          <Route path="whatsapp-templates" element={<WhatsappTemplates />} />
-          <Route path="employees" element={<EmployeeManagement />} />
-          <Route path="customer-distribution" element={<CustomerDistribution />} />
-          <Route path="data-management" element={<DataManagement />} />
-          <Route path="connection-requests" element={<ConnectionRequest />} />
-          <Route path="expenses" element={<ExpenseList />} />
-          <Route path="refunds" element={<RefundList />} />
-          <Route path="deleted-users" element={<DeletedUsers />} />
-          <Route path="payment-gateways" element={<PaymentGateways />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="settings" element={<Settings />} />
+        <Route element={<RequireAuth />}>
+          <Route path="/admin/*" element={<AdminLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="customers" element={<Userlist />} />
+            <Route path="customers/add" element={<AddCustomer />} />
+            <Route path="plans" element={<Plans />} />
+            <Route path="transactions" element={<PaymentHistory />} />
+            <Route path="send-invoices" element={<SendInvoices />} />
+            <Route path="complaints" element={<Complaints />} />
+            <Route path="notifications" element={<Notifications />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="whatsapp-campaign" element={<WhatsappCampaign />} />
+            <Route path="whatsapp-templates" element={<WhatsappTemplates />} />
+            <Route path="employees" element={<EmployeeManagement />} />
+            <Route path="customer-distribution" element={<CustomerDistribution />} />
+            <Route path="data-management" element={<DataManagement />} />
+            <Route path="connection-requests" element={<ConnectionRequest />} />
+            <Route path="expenses" element={<ExpenseList />} />
+            <Route path="refunds" element={<RefundList />} />
+            <Route path="deleted-users" element={<DeletedUsers />} />
+            <Route path="payment-gateways" element={<PaymentGateways />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
         </Route>
       </Routes>
     </Router>
