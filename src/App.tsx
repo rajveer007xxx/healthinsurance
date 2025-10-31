@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import AdminLogin from './pages/AdminLogin'
 import Dashboard from './pages/Dashboard'
 import Userlist from './pages/Userlist'
+import AddCustomer from './pages/AddCustomer'
 import Plans from './pages/Plans'
 import PaymentHistory from './pages/PaymentHistory'
 import SendInvoices from './pages/SendInvoices'
@@ -48,7 +49,11 @@ function App() {
           element={isAdminAuthenticated ? <AdminLayout><Userlist /></AdminLayout> : <Navigate to="/admin/login" />} 
         />
         <Route 
-          path="/admin/plans" 
+          path="/admin/customers/add" 
+          element={isAdminAuthenticated ? <AdminLayout><AddCustomer /></AdminLayout> : <Navigate to="/admin/login" />} 
+        />
+        <Route 
+          path="/admin/plans"
           element={isAdminAuthenticated ? <AdminLayout><Plans /></AdminLayout> : <Navigate to="/admin/login" />} 
         />
         <Route 
