@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import api from '../utils/api'
 import { ArrowLeft, Save } from 'lucide-react'
 import { formatDate } from '../utils/dateFormate'
@@ -137,10 +137,11 @@ const indianCities: Record<string, string[]> = {
   'Uttarakhand': ['Almora', 'Bageshwar', 'Champawat', 'Dehradun', 'Haldwani', 'Haridwar', 'Jaspur', 'Kashipur', 'Kotdwar', 'Manglaur', 'Mussoorie', 'Nainital', 'Pauri', 'Pithoragarh', 'Ramnagar', 'Rishikesh', 'Roorkee', 'Rudraprayag', 'Rudrapur', 'Tehri']
 };
 
-export default function AddCustomer() {
+export default function EditCustomer() {
   const navigate = useNavigate()
+  const { id } = useParams()
   const [activeTab, setActiveTab] = useState(1)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [localities, setLocalities] = useState<any[]>([])
   const [plans, setPlans] = useState<any[]>([])
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
@@ -203,8 +204,9 @@ export default function AddCustomer() {
   useEffect(() => {
     fetchLocalities()
     fetchPlans()
-    generateCustomerId()
-    generateCafNo()
+    if (id) {
+      fetchCustomer()
+    }
     
     const handleWheel = (e: WheelEvent) => {
       const target = e.target as HTMLElement
@@ -218,7 +220,7 @@ export default function AddCustomer() {
     return () => {
       document.removeEventListener('wheel', handleWheel)
     }
-  }, [])
+  }, [id])
 
   useEffect(() => {
     if (formData.start_date && formData.period_months) {
@@ -257,6 +259,69 @@ export default function AddCustomer() {
     setFormData(prev => ({ ...prev, total_bill_amount: total, balance }))
   }, [formData.plan_amount, formData.cgst_tax, formData.sgst_tax, formData.igst_tax, formData.installation_charges, formData.stb_security_amount, formData.discount, formData.amount_paid, formData.period_months])
 
+  const fetchCustomer = async () => {
+    try {
+      const response = await api.get(`/customers/${id}`)
+      const customer = response.data
+      setFormData({
+        category: customer.category || 'prepaid',
+        customer_id: customer.customer_id || '',
+        username: customer.username || '',
+        password: '',
+        full_name: customer.full_name || '',
+        nickname: customer.nickname || '',
+        email: customer.email || '',
+        phone: customer.phone || '',
+        mobile: customer.mobile || '',
+        customer_gst_no: customer.customer_gst_no || '',
+        customer_state_code: customer.customer_state_code || '',
+        gst_invoice_needed: customer.gst_invoice_needed || false,
+        id_proof_type: customer.id_proof_type || 'AADHAR_CARD',
+        id_proof_no: customer.id_proof_no || '',
+        alternate_mobile: customer.alternate_mobile || '',
+        house_number: customer.house_number || '',
+        address: customer.address || '',
+        locality_id: customer.locality_id || null,
+        state: customer.state || '',
+        city: customer.city || '',
+        pincode: customer.pincode || '',
+        service_type: customer.service_type || 'BROADBAND',
+        billing_type: customer.billing_type || 'PREPAID',
+        no_of_connections: customer.no_of_connections || 1,
+        auto_renew: customer.auto_renew || false,
+        caf_no: customer.caf_no || '',
+        mac_address: customer.mac_address || '',
+        mac_address_detail: customer.mac_address_detail || '',
+        ip_address: customer.ip_address || '',
+        vendor: customer.vendor || '',
+        modem_no: customer.modem_no || '',
+        modem_no_detail: customer.modem_no_detail || '',
+        stb_security_amount: customer.stb_modem_security_amount || '',
+        plan_id: customer.plan_id || null,
+        period_months: customer.period_months || 1,
+        start_date: customer.start_date || new Date().toISOString().split('T')[0],
+        end_date: customer.end_date || '',
+        plan_amount: customer.plan_amount || '',
+        cgst_tax: customer.cgst_tax || '',
+        sgst_tax: customer.sgst_tax || '',
+        igst_tax: customer.igst_tax || '',
+        total_bill_amount: customer.total_bill_amount || '',
+        amount_paid: customer.amount_paid || '',
+        installation_charges: customer.installation_charges || '',
+        discount: customer.discount || '',
+        balance: customer.balance || '',
+        payment_method: customer.payment_method ? customer.payment_method.toLowerCase() : 'cash',
+        payment_id: customer.payment_id || '',
+        remarks: customer.remarks || ''
+      })
+    } catch (error) {
+      console.error('Error fetching customer:', error)
+      alert('Failed to load customer details')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const fetchLocalities = async () => {
     try {
       const response = await api.get('/localities/')
@@ -273,20 +338,6 @@ export default function AddCustomer() {
     } catch (error) {
       console.error('Error fetching plans:', error)
     }
-  }
-
-  const generateCustomerId = async () => {
-    try {
-      const response = await api.get('/customers/generate-id/new')
-      setFormData(prev => ({ ...prev, customer_id: response.data.customer_id }))
-    } catch (error) {
-      console.error('Error generating customer ID:', error)
-    }
-  }
-
-  const generateCafNo = () => {
-    const cafNo = 'CAF' + Date.now().toString().slice(-8)
-    setFormData(prev => ({ ...prev, caf_no: cafNo }))
   }
 
   const handlePlanChange = (planId: number) => {
@@ -313,7 +364,7 @@ export default function AddCustomer() {
       const payload = {
         ...(formData.customer_id ? { customer_id: formData.customer_id } : {}),
         username: formData.username,
-        password: formData.password || 'password123',
+        ...(formData.password ? { password: formData.password } : {}),
         full_name: formData.full_name,
         nickname: formData.nickname || null,
         email: formData.email || null,
@@ -357,19 +408,19 @@ export default function AddCustomer() {
         payment_id: formData.payment_id || null
       }
       
-      console.log('Submitting customer data:', payload)
-      await api.post('/customers/', payload)
+      console.log('Updating customer data:', payload)
+      await api.put(`/customers/${id}`, payload)
       
-      alert('Customer added successfully!')
+      alert('Customer updated successfully!')
       navigate('/admin/customers')
     } catch (error: any) {
-      console.error('Error adding customer:', error)
+      console.error('Error updating customer:', error)
       console.error('Error response:', error.response?.data)
       console.error('Error status:', error.response?.status)
       
       setFieldErrors({})
       
-      let errorMessage = 'Error adding customer'
+      let errorMessage = 'Error updating customer'
       if (error.response?.data?.detail) {
         if (Array.isArray(error.response.data.detail)) {
           const newFieldErrors: Record<string, string> = {}
@@ -416,7 +467,7 @@ export default function AddCustomer() {
             >
               <ArrowLeft className="h-6 w-6" />
             </button>
-            <h1 className="text-3xl font-bold text-gray-900">Add New Customer</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Edit Customer</h1>
           </div>
           <button
             onClick={handleSubmit}
@@ -424,7 +475,7 @@ export default function AddCustomer() {
             className="flex items-center px-4 py-2 bg-[#008B8B] text-white  hover:bg-[#006666] disabled:opacity-50"
           >
             <Save className="h-4 w-4 mr-2" />
-            {loading ? 'Saving...' : 'Save Customer'}
+            {loading ? 'Updating...' : 'Update Customer'}
           </button>
         </div>
 

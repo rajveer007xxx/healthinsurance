@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import AdminLayout from '../components/AdminLayout'
 import { Users, DollarSign, FileText, AlertCircle, TrendingUp } from 'lucide-react'
 import api from '../utils/api'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
@@ -144,16 +143,13 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <AdminLayout>
         <div className="flex items-center justify-center h-64">
           <div className="text-gray-500">Loading dashboard...</div>
         </div>
-      </AdminLayout>
     )
   }
 
   return (
-    <AdminLayout>
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
@@ -195,6 +191,5 @@ export default function AdminDashboard() {
           </ResponsiveContainer>
         </div>
       </div>
-    </AdminLayout>
   )
 }
