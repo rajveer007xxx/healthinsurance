@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import { Search, MapPin, Clock, Circle } from 'lucide-react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import api from '../utils/api'
 
 delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -18,6 +19,7 @@ interface Employee {
   longitude: number
   status: 'online' | 'offline'
   lastUpdated: Date
+  employee_image?: string
 }
 
 const generateMockEmployees = (): Employee[] => {
@@ -51,11 +53,51 @@ function MapUpdater({ center }: { center: [number, number] }) {
 }
 
 export default function TrackEmployee() {
-  const [employees, setEmployees] = useState<Employee[]>(generateMockEmployees())
+  const [employees, setEmployees] = useState<Employee[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedEmployee, setSelectedEmployee] = useState<number | 'all'>('all')
   const [mapCenter, setMapCenter] = useState<[number, number]>([30.7333, 76.7794])
   const updateIntervalRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    fetchEmployees()
+  }, [])
+
+  const fetchEmployees = async () => {
+    try {
+      const response = await api.get('/employees/')
+      const realEmployees = response.data.employees || []
+      
+      const baseLocations = [
+        { lat: 30.7333, lng: 76.7794 },
+        { lat: 30.7410, lng: 76.7880 },
+        { lat: 30.7290, lng: 76.7650 },
+        { lat: 30.7500, lng: 76.7900 },
+        { lat: 30.7200, lng: 76.7700 },
+        { lat: 30.7380, lng: 76.7820 },
+        { lat: 30.7450, lng: 76.7750 },
+        { lat: 30.7320, lng: 76.7680 },
+      ]
+      
+      const employeesWithLocation = realEmployees.map((emp: any, index: number) => {
+        const location = baseLocations[index % baseLocations.length]
+        return {
+          id: emp.id,
+          name: emp.full_name,
+          latitude: location.lat + (Math.random() - 0.5) * 0.01,
+          longitude: location.lng + (Math.random() - 0.5) * 0.01,
+          status: Math.random() > 0.3 ? 'online' : 'offline',
+          lastUpdated: new Date(Date.now() - Math.random() * 300000),
+          employee_image: emp.employee_image
+        }
+      })
+      
+      setEmployees(employeesWithLocation)
+    } catch (error) {
+      console.error('Error fetching employees:', error)
+      setEmployees(generateMockEmployees())
+    }
+  }
 
   useEffect(() => {
     updateIntervalRef.current = setInterval(() => {
@@ -221,30 +263,43 @@ export default function TrackEmployee() {
                 onClick={() => handleEmployeeSelect(employee.id)}
               >
                 <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">{employee.name}</h3>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Circle
-                        className={`h-3 w-3 ${
-                          employee.status === 'online'
-                            ? 'fill-green-500 text-green-500'
-                            : 'fill-gray-400 text-gray-400'
-                        }`}
+                  <div className="flex items-start gap-3 flex-1">
+                    {employee.employee_image ? (
+                      <img 
+                        src={`http://82.29.162.153/uploads/${employee.employee_image}`}
+                        alt={employee.name}
+                        className="w-12 h-12 rounded-full object-cover flex-shrink-0"
                       />
-                      <span
-                        className={`text-sm font-medium ${
-                          employee.status === 'online' ? 'text-green-600' : 'text-gray-500'
-                        }`}
-                      >
-                        {employee.status === 'online' ? 'Online' : 'Offline'}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-2 text-gray-500">
-                      <Clock className="h-4 w-4" />
-                      <span className="text-xs">Updated {formatTimeAgo(employee.lastUpdated)}</span>
+                    ) : (
+                      <div className="w-12 h-12 bg-gradient-to-br from-teal-600 to-cyan-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-white font-bold text-lg">{employee.name.charAt(0)}</span>
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900">{employee.name}</h3>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Circle
+                          className={`h-3 w-3 ${
+                            employee.status === 'online'
+                              ? 'fill-green-500 text-green-500'
+                              : 'fill-gray-400 text-gray-400'
+                          }`}
+                        />
+                        <span
+                          className={`text-sm font-medium ${
+                            employee.status === 'online' ? 'text-green-600' : 'text-gray-500'
+                          }`}
+                        >
+                          {employee.status === 'online' ? 'Online' : 'Offline'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2 text-gray-500">
+                        <Clock className="h-4 w-4" />
+                        <span className="text-xs">Updated {formatTimeAgo(employee.lastUpdated)}</span>
+                      </div>
                     </div>
                   </div>
-                  <MapPin className="h-5 w-5 text-teal-600" />
+                  <MapPin className="h-5 w-5 text-teal-600 flex-shrink-0" />
                 </div>
               </div>
             ))}
