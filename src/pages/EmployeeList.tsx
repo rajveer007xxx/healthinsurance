@@ -10,6 +10,7 @@ interface Employee {
   is_active: boolean;
   created_at: string;
   permissions?: string[];
+  employee_image?: string;
 }
 
 const EmployeeList: React.FC = () => {
@@ -155,9 +156,17 @@ const EmployeeList: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-teal-600 to-cyan-600 rounded-full flex items-center justify-center">
-                            <span className="text-white font-bold">{employee.full_name.charAt(0)}</span>
-                          </div>
+                          {employee.employee_image ? (
+                            <img 
+                              src={`http://82.29.162.153/uploads/${employee.employee_image}`}
+                              alt={employee.full_name}
+                              className="flex-shrink-0 h-10 w-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-teal-600 to-cyan-600 rounded-full flex items-center justify-center">
+                              <span className="text-white font-bold">{employee.full_name.charAt(0)}</span>
+                            </div>
+                          )}
                           <div className="ml-4">
                             <div className="text-sm font-medium text-gray-900">{employee.full_name}</div>
                             <div className="text-sm text-gray-500">@{employee.username}</div>

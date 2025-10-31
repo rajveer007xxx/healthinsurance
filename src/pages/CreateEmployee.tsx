@@ -14,6 +14,8 @@ const CreateEmployee: React.FC = () => {
     address: '',
   });
   const [selectedPermissions, setSelectedPermissions] = useState<Set<string>>(new Set());
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const generateCredentials = () => {
     const randomUsername = 'emp_' + Math.random().toString(36).substring(2, 10);
@@ -23,6 +25,26 @@ const CreateEmployee: React.FC = () => {
       username: randomUsername,
       password: randomPassword
     }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        return;
+      }
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,10 +57,26 @@ const CreateEmployee: React.FC = () => {
 
     setLoading(true);
     try {
-      await api.post('/employees/', {
+      const response = await api.post('/employees/', {
         ...formData,
         permissions: Array.from(selectedPermissions)
       });
+      
+      if (selectedFile && response.data.id) {
+        const imageFormData = new FormData();
+        imageFormData.append('file', selectedFile);
+        
+        try {
+          await api.post(`/employees/${response.data.id}/image`, imageFormData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+        } catch (imageError) {
+          console.error('Error uploading image:', imageError);
+        }
+      }
+      
       alert('Employee created successfully!');
       window.location.href = '/admin/employees';
     } catch (error: any) {
@@ -74,15 +112,38 @@ const CreateEmployee: React.FC = () => {
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Profile Image Placeholder */}
+                {/* Profile Image Upload */}
                 <div className="md:col-span-2 flex justify-center">
                   <div className="flex flex-col items-center">
-                    <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center">
-                      <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    </div>
+                    {imagePreview ? (
+                      <img 
+                        src={imagePreview} 
+                        alt="Employee Preview" 
+                        className="w-32 h-32 rounded-full object-cover border-4 border-teal-600"
+                      />
+                    ) : (
+                      <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center">
+                        <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      </div>
+                    )}
                     <label className="block text-sm font-medium text-gray-700 mt-2">Profile Image</label>
+                    <div className="mt-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                        id="employee-image-upload"
+                      />
+                      <label
+                        htmlFor="employee-image-upload"
+                        className="cursor-pointer px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+                      >
+                        {selectedFile ? 'Change Image' : 'Choose Image'}
+                      </label>
+                    </div>
                   </div>
                 </div>
 

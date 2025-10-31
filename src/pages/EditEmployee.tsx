@@ -17,6 +17,8 @@ const EditEmployee: React.FC = () => {
     password: '',
   });
   const [selectedPermissions, setSelectedPermissions] = useState<Set<string>>(new Set());
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     fetchEmployee();
@@ -25,7 +27,7 @@ const EditEmployee: React.FC = () => {
   const fetchEmployee = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/employees/${id}/`);
+      const response = await api.get(`/employees/${id}`);
       const employee = response.data;
       
       setFormData({
@@ -40,11 +42,56 @@ const EditEmployee: React.FC = () => {
       if (employee.permissions && Array.isArray(employee.permissions)) {
         setSelectedPermissions(new Set(employee.permissions));
       }
+      
+      if (employee.employee_image) {
+        setImagePreview(`http://82.29.162.153/uploads/${employee.employee_image}`);
+      }
     } catch (error) {
       console.error('Error fetching employee:', error);
       alert('Error loading employee details');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        return;
+      }
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageUpload = async () => {
+    if (!selectedFile) return;
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      
+      const response = await api.post(`/employees/${id}/image`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      setImagePreview(response.data.image_url);
+      setSelectedFile(null);
+      alert('Image uploaded successfully!');
+    } catch (error: any) {
+      alert(error.response?.data?.detail || 'Error uploading image');
     }
   };
 
@@ -71,7 +118,7 @@ const EditEmployee: React.FC = () => {
         updateData.password = formData.password;
       }
       
-      await api.put(`/employees/${id}/`, updateData);
+      await api.put(`/employees/${id}`, updateData);
       alert('Employee updated successfully!');
       window.location.href = '/admin/employees';
     } catch (error: any) {
@@ -115,15 +162,47 @@ const EditEmployee: React.FC = () => {
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Profile Image Placeholder */}
+                {/* Profile Image Upload */}
                 <div className="md:col-span-2 flex justify-center">
                   <div className="flex flex-col items-center">
-                    <div className="w-32 h-32 bg-gradient-to-br from-teal-600 to-cyan-600 rounded-full flex items-center justify-center">
-                      <span className="text-white text-4xl font-bold">
-                        {formData.full_name.charAt(0) || '?'}
-                      </span>
-                    </div>
+                    {imagePreview ? (
+                      <img 
+                        src={imagePreview} 
+                        alt="Employee" 
+                        className="w-32 h-32 rounded-full object-cover border-4 border-teal-600"
+                      />
+                    ) : (
+                      <div className="w-32 h-32 bg-gradient-to-br from-teal-600 to-cyan-600 rounded-full flex items-center justify-center">
+                        <span className="text-white text-4xl font-bold">
+                          {formData.full_name.charAt(0) || '?'}
+                        </span>
+                      </div>
+                    )}
                     <label className="block text-sm font-medium text-gray-700 mt-2">Profile Image</label>
+                    <div className="mt-2 flex items-center space-x-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                        id="employee-image-upload"
+                      />
+                      <label
+                        htmlFor="employee-image-upload"
+                        className="cursor-pointer px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+                      >
+                        Choose Image
+                      </label>
+                      {selectedFile && (
+                        <button
+                          type="button"
+                          onClick={handleImageUpload}
+                          className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm"
+                        >
+                          Upload
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
 
