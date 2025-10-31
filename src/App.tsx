@@ -16,7 +16,9 @@ import Notifications from './pages/Notifications'
 import Reports from './pages/Reports'
 import WhatsappCampaign from './pages/WhatsappCampaign'
 import WhatsappTemplates from './pages/WhatsappTemplates'
-import EmployeeManagement from './pages/EmployeeManagement'
+import EmployeeList from './pages/EmployeeList'
+import CreateEmployee from './pages/CreateEmployee'
+import EditEmployee from './pages/EditEmployee'
 import TrackEmployee from './pages/TrackEmployee'
 import CustomerDistribution from './pages/CustomerDistribution'
 import DataManagement from './pages/DataManagement'
@@ -57,7 +59,9 @@ function App() {
             <Route path="reports" element={<Reports />} />
             <Route path="whatsapp-campaign" element={<WhatsappCampaign />} />
             <Route path="whatsapp-templates" element={<WhatsappTemplates />} />
-            <Route path="employees" element={<EmployeeManagement />} />
+            <Route path="employees" element={<EmployeeList />} />
+            <Route path="employees/create" element={<CreateEmployee />} />
+            <Route path="employees/:id/edit" element={<EditEmployee />} />
             <Route path="track-employee" element={<TrackEmployee />} />
             <Route path="customer-distribution" element={<CustomerDistribution />} />
             <Route path="data-management" element={<DataManagement />} />
