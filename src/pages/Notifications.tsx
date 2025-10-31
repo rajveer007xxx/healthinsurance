@@ -1,60 +1,110 @@
-import AdminLayout from '../components/AdminLayout'
-import { useNavigate } from 'react-router-dom'
-import { Construction } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Bell, Trash2, CheckCircle } from 'lucide-react'
+import api from '../utils/api'
+
+interface Notification {
+  id: number
+  title: string
+  message: string
+  type: string
+  read: boolean
+  created_at: string
+}
 
 export default function Notifications() {
-  const navigate = useNavigate()
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchNotifications()
+  }, [])
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await api.get('/notifications/')
+      setNotifications(response.data)
+    } catch (error) {
+      console.error('Error fetching notifications:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleMarkAsRead = async (notificationId: number) => {
+    try {
+      await api.patch(`/notifications/${notificationId}/read`)
+      setNotifications(notifications.map(n => 
+        n.id === notificationId ? { ...n, read: true } : n
+      ))
+    } catch (error) {
+      console.error('Error marking notification as read:', error)
+    }
+  }
+
+  const handleDelete = async (notificationId: number) => {
+    try {
+      await api.delete(`/notifications/${notificationId}`)
+      setNotifications(notifications.filter(n => n.id !== notificationId))
+    } catch (error) {
+      console.error('Error deleting notification:', error)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-gray-600">Loading...</div>
+      </div>
+    )
+  }
 
   return (
-    <AdminLayout>
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">
-        <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
-          <div className="mb-6 flex justify-center">
-            <div className="relative">
-              <div className="absolute inset-0 bg-purple-200 rounded-full animate-ping opacity-75"></div>
-              <div className="relative bg-purple-100 rounded-full p-6">
-                <Construction className="h-16 w-16 text-purple-600" />
+    <div>
+      <div className="mb-4">
+        <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
+      </div>
+
+      <div className="space-y-4">
+        {notifications.length === 0 ? (
+          <div className="bg-white rounded shadow p-8 text-center text-gray-500">
+            <Bell className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+            <p>No notifications</p>
+          </div>
+        ) : (
+          notifications.map((notification) => (
+            <div 
+              key={notification.id} 
+              className={`bg-white rounded shadow p-4 ${!notification.read ? 'border-l-4 border-blue-500' : ''}`}
+            >
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900">{notification.title}</h3>
+                  <p className="text-gray-600 mt-1">{notification.message}</p>
+                  <p className="text-sm text-gray-400 mt-2">{notification.created_at}</p>
+                </div>
+                <div className="flex gap-2 ml-4">
+                  {!notification.read && (
+                    <button 
+                      onClick={() => handleMarkAsRead(notification.id)}
+                      className="text-green-600 hover:text-green-800 p-1" 
+                      title="Mark as Read"
+                    >
+                      <CheckCircle className="h-5 w-5" />
+                    </button>
+                  )}
+                  <button 
+                    onClick={() => handleDelete(notification.id)}
+                    className="text-red-600 hover:text-red-800 p-1" 
+                    title="Delete"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-          
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            🚧 Page Under Construction 🚧
-          </h1>
-          
-          <p className="text-gray-600 mb-6">
-            We're working hard to bring you this feature!
-          </p>
-          
-          <div className="bg-purple-50 rounded-lg p-4 mb-6">
-            <p className="text-sm text-purple-900 font-medium mb-1">
-              Please Visit Again Soon
-            </p>
-            <p className="text-xs text-purple-700">
-              This page is currently being developed and will be available shortly.
-            </p>
-          </div>
-          
-          <div className="flex gap-3 justify-center">
-            <button
-              onClick={() => navigate(-1)}
-              className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium transition-colors"
-            >
-              ← Go Back
-            </button>
-            <button
-              onClick={() => navigate('/admin/dashboard')}
-              className="px-6 py-2 bg-white text-purple-600 border-2 border-purple-600 rounded-lg hover:bg-purple-50 font-medium transition-colors"
-            >
-              Dashboard
-            </button>
-          </div>
-          
-          <p className="text-sm text-gray-500 mt-6">
-            Thank you for your patience! 🙏
-          </p>
-        </div>
+          ))
+        )}
       </div>
-    </AdminLayout>
+    </div>
   )
 }

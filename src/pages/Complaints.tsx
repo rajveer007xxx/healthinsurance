@@ -1,9 +1,21 @@
-import AdminLayout from '../components/AdminLayout'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { Plus, Eye, Edit, Trash2 } from 'lucide-react'
 import api from '../utils/api'
 
+interface Complaint {
+  id: number
+  complaint_id: string
+  subject: string
+  priority: string
+  status: string
+  created: string
+  customer_name?: string
+  description?: string
+}
+
 export default function Complaints() {
-  const [complaints, setComplaints] = useState([])
+  const [complaints, setComplaints] = useState<Complaint[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchComplaints()
@@ -15,55 +27,122 @@ export default function Complaints() {
       setComplaints(response.data)
     } catch (error) {
       console.error('Error fetching complaints:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
-  return (
-    <AdminLayout>
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold text-gray-900">Complaints</h1>
+  const handleViewComplaint = (complaintId: number) => {
+    console.log('View complaint:', complaintId)
+    alert('View complaint functionality - to be implemented')
+  }
 
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+  const handleEditComplaint = (complaintId: number) => {
+    console.log('Edit complaint:', complaintId)
+    alert('Edit complaint functionality - to be implemented')
+  }
+
+  const handleDeleteComplaint = async (complaintId: number) => {
+    if (!confirm('Are you sure you want to delete this complaint?')) {
+      return
+    }
+    try {
+      await api.delete(`/complaints/${complaintId}`)
+      setComplaints(complaints.filter(c => c.id !== complaintId))
+      alert('Complaint deleted successfully')
+    } catch (error) {
+      console.error('Error deleting complaint:', error)
+      alert('Failed to delete complaint')
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-gray-600">Loading...</div>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <div className="mb-4 flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-gray-900">Complaints</h1>
+        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          <Plus className="h-4 w-4" />
+          Add Complaint
+        </button>
+      </div>
+
+      <div className="bg-white rounded shadow overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead className="bg-blue-600 text-white">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Complaint ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Subject</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Priority</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Complaint ID</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Subject</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Priority</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Status</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Created</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {complaints.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-4 text-center text-gray-500">No complaints found</td>
+                  <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                    No complaints found
+                  </td>
                 </tr>
               ) : (
-                complaints.map((complaint: any) => (
-                  <tr key={complaint.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{complaint.complaint_id}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{complaint.subject}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        complaint.priority === 'critical' ? 'bg-red-100 text-red-800' :
-                        complaint.priority === 'high' ? 'bg-orange-100 text-orange-800' :
-                        complaint.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                complaints.map((complaint) => (
+                  <tr key={complaint.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{complaint.complaint_id}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{complaint.subject}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">
+                      <span className={`px-2 py-1 text-xs font-semibold rounded ${
+                        complaint.priority === 'High' ? 'bg-red-100 text-red-800' :
+                        complaint.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
                         'bg-green-100 text-green-800'
                       }`}>
                         {complaint.priority}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        complaint.status === 'resolved' ? 'bg-green-100 text-green-800' :
-                        complaint.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                        'bg-gray-100 text-gray-800'
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">
+                      <span className={`px-2 py-1 text-xs font-semibold rounded ${
+                        complaint.status === 'Open' ? 'bg-blue-100 text-blue-800' :
+                        complaint.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
                       }`}>
                         {complaint.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(complaint.created_at).toLocaleDateString()}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{complaint.created}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm">
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => handleViewComplaint(complaint.id)}
+                          className="text-blue-600 hover:text-blue-800 p-1" 
+                          title="View Complaint"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleEditComplaint(complaint.id)}
+                          className="text-green-600 hover:text-green-800 p-1" 
+                          title="Edit Complaint"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteComplaint(complaint.id)}
+                          className="text-red-600 hover:text-red-800 p-1" 
+                          title="Delete Complaint"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))
               )}
@@ -71,6 +150,6 @@ export default function Complaints() {
           </table>
         </div>
       </div>
-    </AdminLayout>
+    </div>
   )
 }

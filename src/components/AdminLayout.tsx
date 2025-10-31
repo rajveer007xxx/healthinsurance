@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { LayoutDashboard, Users, Package, FileText, CreditCard, Settings, LogOut, History, Receipt, AlertCircle, HeadphonesIcon, Bell, MessageCircleIcon, FileTextIcon, BarChart3, UsersIcon, UserPlus, Database, Mail, SettingsIcon, BookOpen, ClipboardList, Wallet, RefreshCw, Trash2, UserCircle, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
+import { LayoutDashboard, Users, Package, History, Receipt, AlertCircle, Bell, BarChart3, UsersIcon, UserPlus, Database, ClipboardList, Wallet, RefreshCw, Trash2, Settings, LogOut, UserCircle, ChevronDown, ChevronLeft, ChevronRight, MessageCircle, FileText } from 'lucide-react'
 import api from '../utils/api'
 import { useSessionTimeout } from '../hooks/useSessionTimeout'
 
@@ -65,8 +65,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/complaints', icon: AlertCircle, label: 'Complaints List' },
     { path: '/admin/notifications', icon: Bell, label: 'Notifications' },
     { path: '/admin/reports', icon: BarChart3, label: 'Reports' },
-    { path: '/admin/whatsapp-campaign', icon: MessageCircleIcon, label: 'Whatsapp Campaign' },
-    { path: '/admin/whatsapp-templates', icon: FileTextIcon, label: 'Whatsapp Templates' },
+    { path: '/admin/whatsapp-campaign', icon: MessageCircle, label: 'Whatsapp Campaign' },
+    { path: '/admin/whatsapp-templates', icon: FileText, label: 'Whatsapp Templates' },
     { path: '/admin/employees', icon: UsersIcon, label: 'Employee Management' },
     { path: '/admin/customer-distribution', icon: UserPlus, label: 'Customer Distribution' },
     { path: '/admin/data-management', icon: Database, label: 'Data Management' },
@@ -79,16 +79,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      {/* Top Navigation Bar */}
       <nav className="bg-white sticky top-0 z-50" style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.1)', borderBottom: '1px solid #000' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-3">
               <div className="flex flex-col">
-                <span className="text-2xl font-bold text-[#448996]">
+                <span className="text-2xl font-bold text-teal-600">
                   {companyName}
                 </span>
                 {companyCode && (
-                  <span className="text-xs font-normal text-[#448996]">
+                  <span className="text-xs font-normal text-teal-600">
                     Company ID: {companyCode}
                   </span>
                 )}
@@ -97,11 +98,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <div className="relative">
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 "
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded"
               >
                 {profileImage ? (
                   <img 
-                    src={`http://82.29.162.153:8002${profileImage}`} 
+                    src={`http://82.29.162.153${profileImage}`} 
                     alt="Profile" 
                     className="h-8 w-8 rounded-full object-cover"
                   />
@@ -112,7 +113,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <ChevronDown className="h-4 w-4" />
               </button>
               {showProfileMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-white  shadow-lg py-1 z-50 border border-gray-200">
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded shadow-lg py-1 z-50 border border-gray-200">
                   <button
                     onClick={() => {
                       setShowProfileMenu(false)
@@ -149,11 +150,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       </nav>
 
       <div className="flex min-h-screen">
-        <aside className={`${sidebarMinimized ? 'w-20' : 'w-64'} bg-[#448996] shadow-sm transition-all duration-300 flex flex-col h-screen sticky top-0`}>
+        {/* Sidebar - Teal color matching production */}
+        <aside className={`${sidebarMinimized ? 'w-20' : 'w-64'} bg-teal-600 shadow-sm transition-all duration-300 flex flex-col h-screen sticky top-0`}>
           <div className="bg-white z-10 p-2 flex justify-between items-center border-b border-gray-300">
             {!sidebarMinimized && companyLogo && (
               <img 
-                src={`http://82.29.162.153:8002${companyLogo}`} 
+                src={`http://82.29.162.153${companyLogo}`} 
                 alt="Company Logo" 
                 className="h-10 w-40 object-contain"
               />
@@ -164,7 +166,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             {sidebarMinimized && <div></div>}
             <button
               onClick={() => setSidebarMinimized(!sidebarMinimized)}
-              className="p-2  hover:bg-gray-100 text-gray-700"
+              className="p-2 rounded hover:bg-gray-100 text-gray-700"
               title={sidebarMinimized ? 'Maximize Sidebar' : 'Minimize Sidebar'}
             >
               {sidebarMinimized ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
@@ -178,10 +180,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <button
                   key={item.path}
                   onClick={() => navigate(item.path)}
-                  className={`w-full flex items-center ${sidebarMinimized ? 'justify-center px-2' : 'px-3'} py-2 text-sm font-medium border border-[#336677] mb-1 transition-all duration-200 ${
+                  className={`w-full flex items-center ${sidebarMinimized ? 'justify-center px-2' : 'px-3'} py-2 text-sm font-medium border border-teal-700 mb-1 rounded transition-all duration-200 ${
                     isActive
-                      ? 'bg-[#00A0A0] text-white font-bold'
-                      : 'text-white hover:bg-[#00A0A0] hover:scale-105'
+                      ? 'bg-teal-500 text-white font-bold'
+                      : 'text-white hover:bg-teal-500 hover:scale-105'
                   }`}
                   title={sidebarMinimized ? item.label : ''}
                 >
@@ -193,6 +195,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </nav>
         </aside>
 
+        {/* Main Content Area */}
         <main className="flex-1 bg-gray-100 p-4 md:p-6 overflow-x-hidden">
           <div className="max-w-full">
             {children}
@@ -200,9 +203,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </main>
       </div>
 
+      {/* Session Timeout Warning Modal */}
       {showWarning && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white  p-6 max-w-md w-full mx-4 shadow-xl">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
             <div className="flex items-center mb-4">
               <AlertCircle className="h-6 w-6 text-yellow-500 mr-3" />
               <h3 className="text-lg font-semibold text-gray-900">Session Timeout Warning</h3>
@@ -213,13 +217,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <div className="flex gap-3">
               <button
                 onClick={extendSession}
-                className="flex-1 px-4 py-2 bg-indigo-600 text-white  hover:bg-indigo-700 font-medium"
+                className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 font-medium"
               >
                 Stay Logged In
               </button>
               <button
                 onClick={logout}
-                className="flex-1 px-4 py-2 bg-gray-200 text-gray-700  hover:bg-gray-300 font-medium"
+                className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 font-medium"
               >
                 Logout Now
               </button>

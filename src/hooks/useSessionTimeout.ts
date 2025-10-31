@@ -1,71 +1,60 @@
-import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect, useCallback } from 'react';
 
-const TIMEOUT_DURATION = 5 * 60 * 1000
-const WARNING_DURATION = 30 * 1000
+const TIMEOUT_DURATION = 30 * 60 * 1000; // 30 minutes
+const WARNING_DURATION = 30 * 1000; // 30 seconds before timeout
 
-export const useSessionTimeout = () => {
-  const navigate = useNavigate()
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const [showWarning, setShowWarning] = useState(false)
+export function useSessionTimeout() {
+  const [showWarning, setShowWarning] = useState(false);
+  const [timeoutId, setTimeoutId] = useState<number | null>(null);
+  const [warningTimeoutId, setWarningTimeoutId] = useState<number | null>(null);
 
-  const logout = () => {
-    localStorage.removeItem('adminToken')
-    navigate('/admin/login')
-  }
+  const clearTimeouts = useCallback(() => {
+    if (timeoutId) clearTimeout(timeoutId);
+    if (warningTimeoutId) clearTimeout(warningTimeoutId);
+  }, [timeoutId, warningTimeoutId]);
 
-  const resetTimer = () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
-    if (warningTimeoutRef.current) {
-      clearTimeout(warningTimeoutRef.current)
-    }
-    setShowWarning(false)
+  const logout = useCallback(() => {
+    clearTimeouts();
+    localStorage.removeItem('adminToken');
+    window.location.href = '/admin/login';
+  }, [clearTimeouts]);
 
-    warningTimeoutRef.current = setTimeout(() => {
-      setShowWarning(true)
-    }, TIMEOUT_DURATION - WARNING_DURATION)
+  const resetTimer = useCallback(() => {
+    clearTimeouts();
+    setShowWarning(false);
 
-    timeoutRef.current = setTimeout(() => {
-      logout()
-    }, TIMEOUT_DURATION)
-  }
+    const warningTimeout = setTimeout(() => {
+      setShowWarning(true);
+    }, TIMEOUT_DURATION - WARNING_DURATION);
 
-  const extendSession = () => {
-    setShowWarning(false)
-    resetTimer()
-  }
+    const logoutTimeout = setTimeout(() => {
+      logout();
+    }, TIMEOUT_DURATION);
+
+    setWarningTimeoutId(warningTimeout);
+    setTimeoutId(logoutTimeout);
+  }, [clearTimeouts, logout]);
+
+  const extendSession = useCallback(() => {
+    resetTimer();
+  }, [resetTimer]);
 
   useEffect(() => {
-    const token = localStorage.getItem('adminToken')
-    if (!token) return
-
-    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click']
-
-    const handleActivity = () => {
-      resetTimer()
-    }
-
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+    
     events.forEach(event => {
-      document.addEventListener(event, handleActivity)
-    })
+      document.addEventListener(event, resetTimer);
+    });
 
-    resetTimer()
+    resetTimer();
 
     return () => {
+      clearTimeouts();
       events.forEach(event => {
-        document.removeEventListener(event, handleActivity)
-      })
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-      }
-      if (warningTimeoutRef.current) {
-        clearTimeout(warningTimeoutRef.current)
-      }
-    }
-  }, [])
+        document.removeEventListener(event, resetTimer);
+      });
+    };
+  }, [resetTimer, clearTimeouts]);
 
-  return { showWarning, extendSession, logout }
+  return { showWarning, extendSession, logout };
 }
