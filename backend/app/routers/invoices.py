@@ -125,6 +125,12 @@ def get_sent_invoices(
         
         status = invoice.status.value if hasattr(invoice.status, 'value') else invoice.status
         
+        locality_name = None
+        locality_id = None
+        if invoice.customer.locality:
+            locality_name = invoice.customer.locality.name
+            locality_id = invoice.customer.locality.id
+        
         result.append({
             "id": invoice.id,
             "invoice_number": invoice.invoice_number,
@@ -132,7 +138,9 @@ def get_sent_invoices(
             "customer": {
                 "customer_id": invoice.customer.customer_id,
                 "full_name": invoice.customer.full_name,
-                "service_type": service_type
+                "service_type": service_type,
+                "locality_id": locality_id,
+                "locality_name": locality_name
             },
             "invoice_date": invoice.invoice_date.isoformat(),
             "total_amount": invoice.total_amount,

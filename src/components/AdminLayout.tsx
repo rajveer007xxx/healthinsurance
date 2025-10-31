@@ -62,6 +62,7 @@ export default function AdminLayout() {
     { path: 'plans', icon: Package, label: 'Plans' },
     { path: 'transactions', icon: History, label: 'Payment History' },
     { path: 'send-invoices', icon: Receipt, label: 'Send Manual Invoice' },
+    { path: 'invoice-list-history', icon: FileText, label: 'Invoice List History' },
     { path: 'complaints', icon: AlertCircle, label: 'Complaints List' },
     { path: 'notifications', icon: Bell, label: 'Notifications' },
     { path: 'reports', icon: BarChart3, label: 'Reports' },

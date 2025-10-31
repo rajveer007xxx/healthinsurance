@@ -11,6 +11,7 @@ import CreateComplaint from './pages/CreateComplaint'
 import Plans from './pages/Plans'
 import PaymentHistory from './pages/PaymentHistory'
 import SendInvoices from './pages/SendInvoices'
+import SendInvoiceList from './pages/SendInvoiceList'
 import Complaints from './pages/Complaints'
 import Notifications from './pages/Notifications'
 import Reports from './pages/Reports'
@@ -53,6 +54,7 @@ function App() {
             <Route path="plans" element={<Plans />} />
             <Route path="transactions" element={<PaymentHistory />} />
             <Route path="send-invoices" element={<SendInvoices />} />
+            <Route path="invoice-list-history" element={<SendInvoiceList />} />
             <Route path="complaints" element={<Complaints />} />
             <Route path="complaints/create" element={<CreateComplaint />} />
             <Route path="notifications" element={<Notifications />} />
