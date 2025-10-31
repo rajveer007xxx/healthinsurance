@@ -310,6 +310,7 @@ export default function AddCustomer() {
     setLoading(true)
     try {
       const payload = {
+        ...(formData.customer_id ? { customer_id: formData.customer_id } : {}),
         username: formData.username,
         password: formData.password || 'password123',
         full_name: formData.full_name,
@@ -490,14 +491,13 @@ export default function AddCustomer() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Customer ID *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Customer ID (Auto-generated)</label>
                   <input
                     type="text"
                     value={formData.customer_id}
-                    onChange={(e) => setFormData({ ...formData, customer_id: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300  "
-                    required
+                    className="w-full px-3 py-2 border border-gray-300 bg-gray-100 cursor-not-allowed"
                     readOnly
+                    placeholder="Generating..."
                   />
                 </div>
 
