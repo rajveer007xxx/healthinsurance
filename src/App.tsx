@@ -40,28 +40,29 @@ function App() {
         <Route path="/" element={<Navigate to="/admin/login" />} />
         <Route path="/admin/login" element={<AdminLogin setIsAuthenticated={setIsAdminAuthenticated} />} />
         
-        <Route element={isAdminAuthenticated ? <AdminLayout /> : <Navigate to="/admin/login" />}>
-          <Route path="/admin/dashboard" element={<Dashboard />} />
-          <Route path="/admin/customers" element={<Userlist />} />
-          <Route path="/admin/customers/add" element={<AddCustomer />} />
-          <Route path="/admin/plans" element={<Plans />} />
-          <Route path="/admin/transactions" element={<PaymentHistory />} />
-          <Route path="/admin/send-invoices" element={<SendInvoices />} />
-          <Route path="/admin/complaints" element={<Complaints />} />
-          <Route path="/admin/notifications" element={<Notifications />} />
-          <Route path="/admin/reports" element={<Reports />} />
-          <Route path="/admin/whatsapp-campaign" element={<WhatsappCampaign />} />
-          <Route path="/admin/whatsapp-templates" element={<WhatsappTemplates />} />
-          <Route path="/admin/employees" element={<EmployeeManagement />} />
-          <Route path="/admin/customer-distribution" element={<CustomerDistribution />} />
-          <Route path="/admin/data-management" element={<DataManagement />} />
-          <Route path="/admin/connection-requests" element={<ConnectionRequest />} />
-          <Route path="/admin/expenses" element={<ExpenseList />} />
-          <Route path="/admin/refunds" element={<RefundList />} />
-          <Route path="/admin/deleted-users" element={<DeletedUsers />} />
-          <Route path="/admin/payment-gateways" element={<PaymentGateways />} />
-          <Route path="/admin/profile" element={<Profile />} />
-          <Route path="/admin/settings" element={<Settings />} />
+        <Route path="/admin" element={isAdminAuthenticated ? <AdminLayout /> : <Navigate to="/admin/login" />}>
+          <Route index element={<Navigate to="dashboard" />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="customers" element={<Userlist />} />
+          <Route path="customers/add" element={<AddCustomer />} />
+          <Route path="plans" element={<Plans />} />
+          <Route path="transactions" element={<PaymentHistory />} />
+          <Route path="send-invoices" element={<SendInvoices />} />
+          <Route path="complaints" element={<Complaints />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="reports" element={<Reports />} />
+          <Route path="whatsapp-campaign" element={<WhatsappCampaign />} />
+          <Route path="whatsapp-templates" element={<WhatsappTemplates />} />
+          <Route path="employees" element={<EmployeeManagement />} />
+          <Route path="customer-distribution" element={<CustomerDistribution />} />
+          <Route path="data-management" element={<DataManagement />} />
+          <Route path="connection-requests" element={<ConnectionRequest />} />
+          <Route path="expenses" element={<ExpenseList />} />
+          <Route path="refunds" element={<RefundList />} />
+          <Route path="deleted-users" element={<DeletedUsers />} />
+          <Route path="payment-gateways" element={<PaymentGateways />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
     </Router>
