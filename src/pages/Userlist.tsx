@@ -8,6 +8,7 @@ import CreateComplaintModal from '../components/CreateComplaintModal'
 import RenewSubscriptionModal from '../components/RenewSubscriptionModal'
 import EditCustomerModal from '../components/EditCustomerModal'
 import TransactionsModal from '../components/TransactionsModal'
+import SendPaymentLinkModal from '../components/SendPaymentLinkModal'
 
 interface Customer {
   id: number
@@ -53,6 +54,7 @@ export default function Userlist() {
   const [showRenewSubscriptionModal, setShowRenewSubscriptionModal] = useState(false)
   const [showEditCustomerModal, setShowEditCustomerModal] = useState(false)
   const [showTransactionsModal, setShowTransactionsModal] = useState(false)
+  const [showSendPaymentLinkModal, setShowSendPaymentLinkModal] = useState(false)
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null)
@@ -102,14 +104,9 @@ export default function Userlist() {
     setShowRenewSubscriptionModal(true)
   }
 
-  const handleSendPaymentLink = async (customer: Customer) => {
-    try {
-      await api.post(`/customers/${customer.id}/send-payment-link`)
-      alert('Payment link sent successfully!')
-    } catch (error) {
-      console.error('Error sending payment link:', error)
-      alert('Failed to send payment link')
-    }
+  const handleSendPaymentLink = (customer: Customer) => {
+    setSelectedCustomer(customer)
+    setShowSendPaymentLinkModal(true)
   }
 
   const handleCreateComplaint = (customer: Customer) => {
@@ -484,6 +481,16 @@ export default function Userlist() {
           setSelectedCustomer(null)
         }}
         customer={selectedCustomer}
+      />
+
+      <SendPaymentLinkModal
+        isOpen={showSendPaymentLinkModal}
+        onClose={() => {
+          setShowSendPaymentLinkModal(false)
+          setSelectedCustomer(null)
+        }}
+        customer={selectedCustomer}
+        onSuccess={fetchCustomers}
       />
 
       {showDeleteConfirm && (

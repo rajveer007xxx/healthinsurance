@@ -21,6 +21,7 @@ interface CollectPaymentModalProps {
 export default function CollectPaymentModal({ isOpen, onClose, customer, onSuccess }: CollectPaymentModalProps) {
   const [formData, setFormData] = useState({
     amount: '',
+    discount: 0,
     payment_method: 'CASH',
     payment_id: '',
     remarks: ''
@@ -32,6 +33,7 @@ export default function CollectPaymentModal({ isOpen, onClose, customer, onSucce
     if (isOpen && customer) {
       setFormData({
         amount: customer.balance?.toString() || '',
+        discount: 0,
         payment_method: 'CASH',
         payment_id: generatePaymentId('CASH'),
         remarks: ''
@@ -65,6 +67,7 @@ export default function CollectPaymentModal({ isOpen, onClose, customer, onSucce
       await api.post('/payments/', {
         customer_id: customer.id,
         amount: parseFloat(formData.amount),
+        discount: parseFloat(formData.discount.toString()) || 0,
         payment_method: formData.payment_method,
         payment_id: formData.payment_id,
         remarks: formData.remarks
@@ -122,6 +125,21 @@ export default function CollectPaymentModal({ isOpen, onClose, customer, onSucce
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                 placeholder="Enter amount"
                 required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Discount
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.discount}
+                onChange={(e) => setFormData(prev => ({ ...prev, discount: parseFloat(e.target.value) || 0 }))}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                placeholder="Enter discount amount (optional)"
               />
             </div>
 

@@ -202,6 +202,7 @@ export default function SendInvoiceModal({ isOpen, onClose, preSelectedCustomer 
         invoice_date: invoiceDate,
         due_date: dueDate,
         items: items.map(item => ({
+          sl_no: item.sl_no,
           particulars: item.particulars,
           units: item.units,
           price: item.price,

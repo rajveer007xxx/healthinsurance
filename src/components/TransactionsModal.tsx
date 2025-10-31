@@ -11,11 +11,13 @@ interface Customer {
 
 interface Transaction {
   id: number
-  payment_date: string
+  transaction_id: string
+  transaction_date: string
   amount: number
-  payment_method: string
-  payment_id: string
-  remarks: string
+  balance_after: number
+  description: string
+  collected_by: number | null
+  collector_name: string | null
 }
 
 interface TransactionsModalProps {
@@ -42,7 +44,7 @@ export default function TransactionsModal({ isOpen, onClose, customer }: Transac
     setError('')
     
     try {
-      const response = await api.get(`/payments/?customer_id=${customer.id}`)
+      const response = await api.get(`/transactions/?customer_id=${customer.id}`)
       setTransactions(response.data)
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to load transactions')
@@ -98,49 +100,75 @@ export default function TransactionsModal({ isOpen, onClose, customer }: Transac
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Sl. No.
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Amount
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Payment Method
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Payment ID
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Payment Collector
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Payment Method
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Total Due
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Paid Amount
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      After Payment Balance
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Remarks
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {transactions.map((transaction, index) => (
-                    <tr key={transaction.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {index + 1}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(transaction.payment_date).toLocaleDateString('en-GB')}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ₹{transaction.amount.toFixed(2)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {transaction.payment_method}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {transaction.payment_id || '-'}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        {transaction.remarks || '-'}
-                      </td>
-                    </tr>
-                  ))}
+                  {transactions.map((transaction) => {
+                    const discountMatch = transaction.description?.match(/Discount:\s*₹?([\d.]+)/)
+                    const discount = discountMatch ? parseFloat(discountMatch[1]) : 0
+                    
+                    const totalDue = transaction.balance_after + transaction.amount + discount
+                    
+                    const methodMatch = transaction.description?.match(/Payment received via (\w+)/)
+                    const paymentMethod = methodMatch ? methodMatch[1] : 'N/A'
+                    
+                    const paymentMethodDisplay = discount > 0 
+                      ? `${paymentMethod} (Discount: ₹${discount.toFixed(2)})`
+                      : paymentMethod
+                    
+                    return (
+                      <tr key={transaction.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {new Date(transaction.transaction_date).toLocaleDateString('en-GB')}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {transaction.transaction_id || '-'}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {transaction.collector_name || '-'}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {paymentMethodDisplay}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                          ₹{totalDue.toFixed(2)}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                          ₹{transaction.amount.toFixed(2)}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                          ₹{transaction.balance_after.toFixed(2)}
+                        </td>
+                        <td className="px-4 py-4 text-sm text-gray-900">
+                          {transaction.description || '-'}
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
