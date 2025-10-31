@@ -290,46 +290,46 @@ export default function Userlist() {
           <table className="min-w-full">
             <thead className="bg-black text-white">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Cust ID</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Cust Name</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Mobile</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Plan</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Amount</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Received</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Balance</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Exp. Date</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
+                <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider">Cust ID</th>
+                <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider">Cust Name</th>
+                <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider">Mobile</th>
+                <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider">Status</th>
+                <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider">Plan</th>
+                <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider">Amount</th>
+                <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider">Received</th>
+                <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider">Balance</th>
+                <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider">Exp. Date</th>
+                <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredCustomers.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="px-4 py-8 text-center text-gray-500">
+                  <td colSpan={10} className="px-2 py-8 text-center text-gray-500">
                     {loading ? 'Loading...' : 'Showing 1 to 0 of 0 entries'}
                   </td>
                 </tr>
               ) : (
                 filteredCustomers.map((customer) => (
                   <tr key={customer.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{customer.customer_id}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{customer.full_name}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{customer.mobile}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm">
+                    <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">{customer.customer_id}</td>
+                    <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">{customer.full_name}</td>
+                    <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">{customer.mobile}</td>
+                    <td className="px-2 py-3 whitespace-nowrap text-sm">
                       <span className={`px-2 py-1 text-xs font-semibold rounded ${
                         customer.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>
                         {customer.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{customer.plan_name}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">₹{customer.plan_amount}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">₹{customer.received_amount || 0}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">₹{customer.balance || 0}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">{customer.plan_name}</td>
+                    <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">₹{customer.plan_amount}</td>
+                    <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">₹{customer.received_amount || 0}</td>
+                    <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">₹{customer.balance || 0}</td>
+                    <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900">
                       {customer.expiry_date ? new Date(customer.expiry_date).toLocaleDateString('en-GB').replace(/\//g, '/') : '-'}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm">
+                    <td className="px-2 py-3 whitespace-nowrap text-sm">
                       <div className="flex gap-1">
                         <button 
                           onClick={() => handleCollectPayment(customer)}

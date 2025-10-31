@@ -13,6 +13,8 @@ interface Customer {
   status?: string
   username?: string
   auto_renew?: boolean
+  balance_amount?: number
+  stb_modem_security_amount?: number
 }
 
 interface RenewSubscriptionModalProps {
@@ -56,9 +58,8 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
     setError('')
 
     try {
-      const endDateISO = new Date(updateEndDate + 'T00:00:00').toISOString()
       await api.put(`/customers/${customer.id}`, {
-        end_date: endDateISO,
+        end_date: updateEndDate,
         status: 'ACTIVE'
       })
       
@@ -123,7 +124,7 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
     try {
       if (withInvoice) {
         await api.post(`/customers/${customer.id}/renew?period_months=${renewWithMonths}`)
-        alert(`Subscription renewed for ${renewWithMonths} month(s) with invoice!`)
+        alert(`Subscription renewed for ${renewWithMonths} month(s) with invoice! Email sent to customer.`)
       } else {
         if (!customer.end_date) {
           setError('Customer end date not found')
@@ -131,11 +132,19 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
         }
         const currentEndDate = new Date(customer.end_date)
         const newEndDate = new Date(currentEndDate.getTime() + (renewWithMonths * 30 * 24 * 60 * 60 * 1000))
+        const newEndDateStr = newEndDate.toISOString().split('T')[0]
+        
+        const planResponse = await api.get(`/plans/${customer.plan_id}`)
+        const planPrice = planResponse.data.price || 0
+        const renewalAmount = planPrice * renewWithMonths
+        const newBalance = (customer.balance_amount || 0) + renewalAmount
+        
         await api.put(`/customers/${customer.id}`, {
-          end_date: newEndDate.toISOString(),
+          end_date: newEndDateStr,
+          balance_amount: newBalance,
           status: 'ACTIVE'
         })
-        alert(`Subscription renewed for ${renewWithMonths} month(s) without invoice!`)
+        alert(`Subscription renewed for ${renewWithMonths} month(s) without invoice! Balance updated.`)
       }
       
       onSuccess()
@@ -161,15 +170,23 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
     try {
       if (withInvoice) {
         await api.post(`/customers/${customer.id}/renew?period_months=${instantRenewMonths}`)
-        alert(`Subscription renewed for ${instantRenewMonths} month(s) with invoice!`)
+        alert(`Subscription renewed for ${instantRenewMonths} month(s) with invoice! Email sent to customer.`)
       } else {
         const startDate = new Date(instantRenewDate)
         const newEndDate = new Date(startDate.getTime() + (instantRenewMonths * 30 * 24 * 60 * 60 * 1000))
+        const newEndDateStr = newEndDate.toISOString().split('T')[0]
+        
+        const planResponse = await api.get(`/plans/${customer.plan_id}`)
+        const planPrice = planResponse.data.price || 0
+        const renewalAmount = planPrice * instantRenewMonths
+        const newBalance = (customer.balance_amount || 0) + renewalAmount
+        
         await api.put(`/customers/${customer.id}`, {
-          end_date: newEndDate.toISOString(),
+          end_date: newEndDateStr,
+          balance_amount: newBalance,
           status: 'ACTIVE'
         })
-        alert(`Subscription renewed for ${instantRenewMonths} month(s) without invoice!`)
+        alert(`Subscription renewed for ${instantRenewMonths} month(s) without invoice! Balance updated.`)
       }
       
       onSuccess()
@@ -184,8 +201,23 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
   const handleRevertLastRenew = async () => {
     if (!customer) return
     
-    setError('Revert Last Renew functionality is not available. Please contact administrator.')
+    if (!confirm('Are you sure you want to revert the last renewal? This action cannot be undone.')) {
+      return
+    }
     
+    setLoading(true)
+    setError('')
+
+    try {
+      await api.post(`/invoices/revert-last-renew/${customer.id}`)
+      alert('Last renewal reverted successfully!')
+      onSuccess()
+      onClose()
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to revert last renewal')
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (!isOpen || !customer) return null
@@ -207,7 +239,7 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-[1fr_2fr] gap-3">
             <div className="bg-gray-50 rounded-lg p-3">
               <div className="bg-gray-600 text-white text-center py-1 mb-2 rounded">
                 <h3 className="font-semibold text-sm">Connection Information</h3>
@@ -250,9 +282,14 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
 
                 <div className="bg-white p-2 rounded">
                   <div className="text-xs font-semibold text-gray-700">Status</div>
-                  <div className={`text-sm font-semibold ${customer.status === 'ACTIVE' ? 'text-green-600' : 'text-red-600'}`}>
-                    {customer.status || 'DEACTIVE'}
+                  <div className={`text-sm font-semibold ${activateCustomer ? 'text-green-600' : 'text-red-600'}`}>
+                    {activateCustomer ? 'ACTIVE' : 'DEACTIVE'}
                   </div>
+                </div>
+
+                <div className="bg-white p-2 rounded">
+                  <div className="text-xs font-semibold text-gray-700">Modem/STB Deposit</div>
+                  <div className="text-sm text-gray-900">₹{customer.stb_modem_security_amount || 0}</div>
                 </div>
               </div>
             </div>
@@ -285,34 +322,32 @@ export default function RenewSubscriptionModal({ isOpen, onClose, customer, onSu
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 mb-1">
-                <div className="flex items-center justify-between bg-white p-1 rounded">
-                  <span className="text-xs font-medium text-gray-700">Auto Renew:</span>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={autoRenew}
-                      onChange={(e) => handleAutoRenewToggle(e.target.checked)}
-                      className="sr-only peer"
-                      disabled={loading}
-                    />
-                    <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
-                  </label>
-                </div>
+              <div className="flex items-center justify-between bg-white p-2 rounded mb-1">
+                <span className="text-xs font-medium text-gray-700">Auto Renew:</span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={autoRenew}
+                    onChange={(e) => handleAutoRenewToggle(e.target.checked)}
+                    className="sr-only peer"
+                    disabled={loading}
+                  />
+                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
+                </label>
+              </div>
 
-                <div className="flex items-center justify-between bg-white p-1 rounded">
-                  <span className="text-xs font-medium text-gray-700">Activate:</span>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={activateCustomer}
-                      onChange={(e) => handleActivateCustomerToggle(e.target.checked)}
-                      className="sr-only peer"
-                      disabled={loading}
-                    />
-                    <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
-                  </label>
-                </div>
+              <div className="flex items-center justify-between bg-white p-2 rounded mb-1">
+                <span className="text-xs font-medium text-gray-700">Activate:</span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={activateCustomer}
+                    onChange={(e) => handleActivateCustomerToggle(e.target.checked)}
+                    className="sr-only peer"
+                    disabled={loading}
+                  />
+                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
+                </label>
               </div>
 
               <div className="bg-blue-100 py-1 px-2 mb-1 rounded">
