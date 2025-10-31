@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import api from '../utils/api'
 import { ArrowLeft, Save } from 'lucide-react'
 import { formatDate } from '../utils/dateFormate'
+import { generatePaymentId } from '../utils/constants'
 
 interface CustomerForm {
   category: string
@@ -916,7 +917,13 @@ export default function AddCustomer() {
                   <input
                     type="number"
                     value={formData.amount_paid}
-                    onChange={(e) => setFormData({ ...formData, amount_paid: Number(e.target.value) })}
+                    onChange={(e) => {
+                      const amount = Number(e.target.value)
+                      setFormData({ ...formData, amount_paid: amount })
+                      if (amount > 0 && formData.payment_method && !formData.payment_id) {
+                        setFormData(prev => ({ ...prev, amount_paid: amount, payment_id: generatePaymentId(prev.payment_method) }))
+                      }
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 "
                   />
                 </div>
@@ -965,9 +972,16 @@ export default function AddCustomer() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method *</label>
                   <select
                     value={formData.payment_method}
-                    onChange={(e) => setFormData({ ...formData, payment_method: e.target.value })}
+                    onChange={(e) => {
+                      const method = e.target.value
+                      setFormData({ ...formData, payment_method: method })
+                      if (Number(formData.amount_paid) > 0 && method) {
+                        setFormData(prev => ({ ...prev, payment_method: method, payment_id: generatePaymentId(method) }))
+                      }
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 "
                   >
+                    <option value="">Select Payment Method</option>
                     <option value="cash">Cash</option>
                     <option value="paytm">Paytm</option>
                     <option value="phonepe">PhonePe</option>
@@ -979,11 +993,12 @@ export default function AddCustomer() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Payment ID *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Payment ID (Auto-generated)</label>
                   <input
                     type="text"
                     value={formData.payment_id}
                     onChange={(e) => setFormData({ ...formData, payment_id: e.target.value })}
+                    placeholder="Will be generated based on payment method"
                     className="w-full px-3 py-2 border border-gray-300 "
                   />
                 </div>

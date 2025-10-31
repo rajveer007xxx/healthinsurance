@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Save, Upload } from 'lucide-react'
 import api from '../utils/api'
+import { INDIAN_STATES } from '../utils/constants'
 
 export default function Settings() {
   const [settings, setSettings] = useState({
@@ -26,6 +27,8 @@ export default function Settings() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const logoInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     fetchSettings()
@@ -56,6 +59,49 @@ export default function Settings() {
       setMessage(error.response?.data?.detail || 'Failed to update settings')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      setMessage('Please select an image file')
+      return
+    }
+
+    setUploading(true)
+    setMessage('')
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await api.post('/upload/company-logo', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+
+      setSettings({ ...settings, company_logo: response.data.logo_url })
+      setMessage('Logo uploaded successfully!')
+    } catch (error: any) {
+      setMessage(error.response?.data?.detail || 'Failed to upload logo')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+
+  const handleStateChange = (stateName: string) => {
+    const selectedState = INDIAN_STATES.find(state => state.name === stateName)
+    if (selectedState) {
+      setSettings({
+        ...settings,
+        company_state: selectedState.name,
+        company_state_code: selectedState.code
+      })
     }
   }
 
@@ -98,12 +144,21 @@ export default function Settings() {
                     className="h-16 w-32 object-contain border rounded"
                   />
                 )}
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  className="hidden"
+                />
                 <button
                   type="button"
-                  className="flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200"
+                  onClick={() => logoInputRef.current?.click()}
+                  disabled={uploading}
+                  className="flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 disabled:opacity-50"
                 >
                   <Upload className="h-5 w-5" />
-                  Upload Logo
+                  {uploading ? 'Uploading...' : 'Upload Logo'}
                 </button>
               </div>
             </div>
@@ -170,21 +225,27 @@ export default function Settings() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
-              <input
-                type="text"
+              <select
                 value={settings.company_state}
-                onChange={(e) => setSettings({ ...settings, company_state: e.target.value })}
+                onChange={(e) => handleStateChange(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              />
+              >
+                <option value="">Select State</option>
+                {INDIAN_STATES.map((state) => (
+                  <option key={state.code} value={state.name}>
+                    {state.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">State Code</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">State Code (Auto-filled)</label>
               <input
                 type="text"
                 value={settings.company_state_code}
-                onChange={(e) => setSettings({ ...settings, company_state_code: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                readOnly
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
               />
             </div>
           </div>
