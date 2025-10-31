@@ -13,6 +13,7 @@ import Reports from './pages/Reports'
 import WhatsappCampaign from './pages/WhatsappCampaign'
 import WhatsappTemplates from './pages/WhatsappTemplates'
 import EmployeeManagement from './pages/EmployeeManagement'
+import TrackEmployee from './pages/TrackEmployee'
 import CustomerDistribution from './pages/CustomerDistribution'
 import DataManagement from './pages/DataManagement'
 import ConnectionRequest from './pages/ConnectionRequest'
@@ -49,6 +50,7 @@ function App() {
             <Route path="whatsapp-campaign" element={<WhatsappCampaign />} />
             <Route path="whatsapp-templates" element={<WhatsappTemplates />} />
             <Route path="employees" element={<EmployeeManagement />} />
+            <Route path="track-employee" element={<TrackEmployee />} />
             <Route path="customer-distribution" element={<CustomerDistribution />} />
             <Route path="data-management" element={<DataManagement />} />
             <Route path="connection-requests" element={<ConnectionRequest />} />

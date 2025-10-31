@@ -1,6 +1,6 @@
 import { useNavigate, useLocation, Outlet } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { LayoutDashboard, Users, Package, History, Receipt, AlertCircle, Bell, BarChart3, UsersIcon, UserPlus, Database, ClipboardList, Wallet, RefreshCw, Trash2, Settings, LogOut, UserCircle, ChevronDown, ChevronLeft, ChevronRight, MessageCircle, FileText } from 'lucide-react'
+import { LayoutDashboard, Users, Package, History, Receipt, AlertCircle, Bell, BarChart3, UsersIcon, UserPlus, Database, ClipboardList, Wallet, RefreshCw, Trash2, Settings, LogOut, UserCircle, ChevronDown, ChevronLeft, ChevronRight, MessageCircle, FileText, MapPin } from 'lucide-react'
 import api from '../utils/api'
 import { useSessionTimeout } from '../hooks/useSessionTimeout'
 
@@ -68,6 +68,7 @@ export default function AdminLayout() {
     { path: 'whatsapp-campaign', icon: MessageCircle, label: 'Whatsapp Campaign' },
     { path: 'whatsapp-templates', icon: FileText, label: 'Whatsapp Templates' },
     { path: 'employees', icon: UsersIcon, label: 'Employee Management' },
+    { path: 'track-employee', icon: MapPin, label: 'Track Employee' },
     { path: 'customer-distribution', icon: UserPlus, label: 'Customer Distribution' },
     { path: 'data-management', icon: Database, label: 'Data Management' },
     { path: 'connection-requests', icon: ClipboardList, label: 'Connection Request' },
