@@ -28,7 +28,7 @@ function App() {
   }
 
   return (
-    <Router>
+    <Router basename="/superadmin">
       <Routes>
         <Route
           path="/login"

@@ -108,4 +108,6 @@ def authenticate_customer(db: Session, mobile: str, password: str):
     user = db.query(Customer).filter(Customer.mobile == mobile).first()
     if not user:
         return None
+    if not verify_password(password, user.password_hash):
+        return None
     return user

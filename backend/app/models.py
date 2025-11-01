@@ -116,6 +116,7 @@ class Customer(Base):
     name = Column(String, nullable=False)
     email = Column(String, nullable=True)
     mobile = Column(String, nullable=False)
+    password_hash = Column(String, nullable=False)  # Password for customer portal login
     alternate_mobile = Column(String, nullable=True)
     
     address = Column(String, nullable=False)

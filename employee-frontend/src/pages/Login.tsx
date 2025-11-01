@@ -30,7 +30,7 @@ export default function Login({ setIsAuthenticated }: LoginProps) {
       localStorage.setItem('token', access_token);
       localStorage.setItem('userType', user_type);
       setIsAuthenticated(true);
-      navigate('/dashboard');
+      navigate('dashboard');
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Login failed. Please check your credentials.');
     } finally {

@@ -29,7 +29,7 @@ function App() {
   }
 
   return (
-    <Router>
+    <Router basename="/employee">
       <Routes>
         <Route
           path="/login"
