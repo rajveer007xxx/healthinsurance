@@ -74,6 +74,12 @@ async def create_customer(
     customer_data["company_id"] = company_id
     
     password = customer_data.pop("password")
+    if not password:
+        import secrets
+        import string
+        alphabet = string.ascii_letters + string.digits
+        password = ''.join(secrets.choice(alphabet) for _ in range(8))
+    
     customer_data["password_hash"] = get_password_hash(password)
     
     if customer_data.get("start_date") and customer_data.get("plan_id"):

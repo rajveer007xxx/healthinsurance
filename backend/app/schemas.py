@@ -96,7 +96,7 @@ class CustomerCreate(BaseModel):
     name: str
     email: Optional[EmailStr] = None
     mobile: str
-    password: str  # Password for customer portal login
+    password: Optional[str] = None  # Password for customer portal login (auto-generated if not provided)
     alternate_mobile: Optional[str] = None
     address: str
     locality: Optional[str] = None
