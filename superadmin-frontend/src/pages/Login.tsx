@@ -55,36 +55,40 @@ export default function Login({ setIsAuthenticated }: LoginProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium">
+              <label htmlFor="superadmin-email" className="text-sm font-medium">
                 Email
               </label>
               <Input
-                id="email"
+                id="superadmin-email"
+                name="superadmin-email"
                 type="email"
                 placeholder="superadmin@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                autoComplete="section-superadmin username"
                 required
                 className="h-11"
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium">
+              <label htmlFor="superadmin-password" className="text-sm font-medium">
                 Password
               </label>
               <Input
-                id="password"
+                id="superadmin-password"
+                name="superadmin-password"
                 type="password"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="section-superadmin current-password"
                 required
                 className="h-11"
               />

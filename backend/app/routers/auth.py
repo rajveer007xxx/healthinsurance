@@ -27,7 +27,7 @@ async def superadmin_login(login_data: LoginRequest, db: Session = Depends(get_d
     
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.id, "type": "superadmin"},
+        data={"sub": str(user.id), "type": "superadmin"},
         expires_delta=access_token_expires
     )
     
@@ -51,7 +51,7 @@ async def admin_login(login_data: LoginRequest, db: Session = Depends(get_db)):
     
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.id, "type": "admin", "company_id": user.company_id},
+        data={"sub": str(user.id), "type": "admin", "company_id": user.company_id},
         expires_delta=access_token_expires
     )
     
@@ -75,7 +75,7 @@ async def employee_login(login_data: LoginRequest, db: Session = Depends(get_db)
     
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.id, "type": "employee", "company_id": user.company_id},
+        data={"sub": str(user.id), "type": "employee", "company_id": user.company_id},
         expires_delta=access_token_expires
     )
     
@@ -99,7 +99,7 @@ async def customer_login(login_data: CustomerLoginRequest, db: Session = Depends
     
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.id, "type": "customer", "company_id": user.company_id},
+        data={"sub": str(user.id), "type": "customer", "company_id": user.company_id},
         expires_delta=access_token_expires
     )
     

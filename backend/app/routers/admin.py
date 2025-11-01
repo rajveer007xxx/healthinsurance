@@ -73,6 +73,9 @@ async def create_customer(
     customer_data = customer.dict()
     customer_data["company_id"] = company_id
     
+    password = customer_data.pop("password")
+    customer_data["password_hash"] = get_password_hash(password)
+    
     if customer_data.get("start_date") and customer_data.get("plan_id"):
         plan = db.query(Plan).filter(Plan.id == customer_data["plan_id"]).first()
         if plan:
