@@ -6,12 +6,13 @@ authors = ["Devin AI <158243242+devin-ai-integration[bot]@users.noreply.github.c
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.10"
 fastapi = {extras = ["standard"], version = "^0.120.4"}
 psycopg = {extras = ["binary"], version = "^3.2.12"}
 sqlalchemy = "^2.0.44"
 python-jose = {extras = ["cryptography"], version = "^3.5.0"}
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+bcrypt = "4.0.1"
 python-multipart = "^0.0.20"
 python-dotenv = "^1.2.1"
 pydantic-settings = "^2.11.0"
